@@ -1,0 +1,24 @@
+# Core framework
+fastapi==0.109.0
+uvicorn==0.27.0
+mangum==0.17.0
+
+# Data validation
+pydantic==2.5.0
+
+# NLP and NER
+spacy==3.7.2
+presidio-analyzer==2.2.354
+
+# Phone number parsing
+phonenumbers==8.13.27
+
+# Pattern matching
+pyahocorasick==2.0.0
+
+# Testing
+requests==2.31.0
+
+# spaCy language models (direct wheel URLs for Vercel deployment)
+https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.7.1/en_core_web_lg-3.7.1-py3-none-any.whl
+https://github.com/explosion/spacy-models/releases/download/de_core_news_lg-3.7.0/de_core_news_lg-3.7.0-py3-none-any.whl

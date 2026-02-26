@@ -1,0 +1,18 @@
+{
+  "functions": {
+    "api/anonymise.py": {
+      "runtime": "python3.11",
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/anonymise",
+      "dest": "/api/anonymise.py"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
+    }
+  ]
+}
