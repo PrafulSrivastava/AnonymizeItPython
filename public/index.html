@@ -3,186 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Anonymization Pipeline</title>
+    <title>WhatsApp PII Anonymization Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        :root {
+            /* 3 Color Rule */
+            --light: #fafafa;
+            --dark: #0f172a;
+            --accent: #14b8a6;
+
+            /* Derived shades */
+            --dark-soft: #1e293b;
+            --dark-muted: #334155;
+            --light-gray: #e2e8f0;
+            --accent-light: rgba(20, 184, 166, 0.1);
+            --accent-glow: rgba(20, 184, 166, 0.2);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--light);
+            color: var(--dark);
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 60px 24px;
         }
 
         .header {
             text-align: center;
-            color: white;
-            margin-bottom: 30px;
+            margin-bottom: 64px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 24px;
+        }
+
+        .logo-badge .material-icons {
+            font-size: 16px;
         }
 
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 3.5rem;
             font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            color: var(--dark);
         }
 
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
+        .header h1 .highlight {
+            color: var(--accent);
+            position: relative;
         }
 
-        .main-content {
+        .header .subtitle {
+            font-size: 1.125rem;
+            color: var(--dark-muted);
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .main-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+            grid-template-columns: 480px 1fr;
+            gap: 32px;
+            align-items: start;
         }
 
-        @media (max-width: 968px) {
-            .main-content {
+        @media (max-width: 1200px) {
+            .main-grid {
                 grid-template-columns: 1fr;
             }
         }
 
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
         }
 
-        .card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #333;
+        .card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .card-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--light-gray);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .card h2::before {
-            content: '';
-            width: 4px;
-            height: 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 2px;
+        .card-header .material-icons {
+            font-size: 24px;
+            color: var(--accent);
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .card-content {
+            padding: 28px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 600;
-            color: #555;
-            font-size: 0.9rem;
+            color: var(--dark);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-group label .material-icons {
+            font-size: 16px;
+            color: var(--accent);
+        }
+
+        .form-group label .required {
+            color: var(--accent);
         }
 
         .form-group input,
         .form-group textarea {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            transition: border-color 0.3s;
+            padding: 14px 16px;
+            background: var(--light);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            color: var(--dark);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
         }
 
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent);
+            background: white;
+            box-shadow: 0 0 0 4px var(--accent-light);
         }
 
         .form-group textarea {
             resize: vertical;
-            min-height: 150px;
-            font-family: 'Consolas', 'Monaco', monospace;
+            min-height: 140px;
+            line-height: 1.6;
         }
 
         .form-group small {
             display: block;
-            margin-top: 5px;
-            color: #888;
-            font-size: 0.85rem;
+            margin-top: 6px;
+            color: var(--dark-muted);
+            font-size: 0.813rem;
+        }
+
+        .examples {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        .examples-label {
+            font-size: 0.813rem;
+            color: var(--dark-muted);
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .examples-label .material-icons {
+            font-size: 16px;
+            color: var(--accent);
+        }
+
+        .example-btn {
+            display: inline-block;
+            padding: 8px 14px;
+            margin: 4px 6px 4px 0;
+            background: var(--light);
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            color: var(--dark-muted);
+            font-size: 0.813rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .example-btn:hover {
+            background: var(--accent-light);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
         }
 
         .button-group {
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            margin-top: 32px;
         }
 
         button {
-            flex: 1;
-            padding: 14px 24px;
+            padding: 16px 32px;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.938rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--accent);
             color: white;
+            flex: 1;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover:not(:disabled)::before {
+            left: 100%;
         }
 
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 24px var(--accent-glow);
         }
 
         .btn-primary:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
         }
 
         .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
+            background: var(--light);
+            color: var(--dark-muted);
+            border: 2px solid var(--light-gray);
+            padding: 14px 28px;
         }
 
         .btn-secondary:hover {
-            background: #e0e0e0;
+            background: white;
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
-            color: #667eea;
+            padding: 80px 20px;
         }
 
         .loading.active {
             display: block;
         }
 
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--light-gray);
+            border-top-color: var(--accent);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--dark-muted);
+            font-weight: 500;
+            font-size: 0.938rem;
         }
 
         .results {
@@ -194,9 +384,9 @@
         }
 
         .result-section {
-            margin-bottom: 24px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--light-gray);
         }
 
         .result-section:last-child {
@@ -206,213 +396,281 @@
         }
 
         .result-section h3 {
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            color: #555;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            color: var(--dark);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-section h3 .material-icons {
+            font-size: 20px;
+            color: var(--accent);
         }
 
         .cleaned-text {
-            background: #f8f9fa;
-            padding: 16px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-            font-family: 'Consolas', 'Monaco', monospace;
-            line-height: 1.6;
-            color: #333;
+            background: var(--light);
+            padding: 24px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            font-family: 'IBM Plex Mono', monospace;
+            line-height: 1.8;
+            color: var(--dark);
             white-space: pre-wrap;
             word-break: break-word;
+            font-size: 0.938rem;
+        }
+
+        .routing-section {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 28px;
+            align-items: center;
+            margin-bottom: 24px;
+            background: var(--light);
+            padding: 24px;
+            border-radius: 12px;
+        }
+
+        .confidence-display {
+            text-align: center;
+            padding-right: 28px;
+            border-right: 2px solid var(--light-gray);
+        }
+
+        .confidence-score {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .confidence-label {
+            font-size: 0.75rem;
+            color: var(--dark-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 8px;
+        }
+
+        .routing-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .routing-info-label {
+            font-size: 0.75rem;
+            color: var(--dark-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .routing-badge {
             display: inline-block;
-            padding: 6px 16px;
-            border-radius: 20px;
+            padding: 10px 20px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            border-radius: 8px;
             text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .routing-pass {
-            background: #d4edda;
-            color: #155724;
+            background: #d1fae5;
+            color: #065f46;
         }
 
         .routing-pass_flagged {
-            background: #fff3cd;
-            color: #856404;
+            background: #fef3c7;
+            color: #92400e;
         }
 
         .routing-review {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .confidence-score {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #667eea;
-            margin: 10px 0;
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         .signals-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 12px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .signals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         .signal-item {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--light-gray);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .signal-item:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px var(--accent-glow);
         }
 
         .signal-item label {
             display: block;
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 4px;
+            font-size: 0.75rem;
+            color: var(--dark-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
         }
 
         .signal-item .value {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #333;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            font-family: 'IBM Plex Mono', monospace;
         }
 
         .tokens-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 12px;
+            font-size: 0.875rem;
         }
 
         .tokens-table th,
         .tokens-table td {
-            padding: 10px;
+            padding: 14px 16px;
             text-align: left;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid var(--light-gray);
         }
 
         .tokens-table th {
-            background: #f8f9fa;
+            background: var(--light);
             font-weight: 600;
-            color: #555;
-            font-size: 0.9rem;
+            color: var(--dark);
+            font-size: 0.813rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .tokens-table td {
-            font-size: 0.9rem;
+        .tokens-table tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        .tokens-table tbody tr:hover {
+            background: var(--light);
         }
 
         .token-type {
-            font-family: 'Consolas', 'Monaco', monospace;
-            background: #e7e7ff;
-            color: #4a4a9f;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.85rem;
+            font-family: 'IBM Plex Mono', monospace;
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            border-radius: 6px;
         }
 
         .token-value {
-            font-family: 'Consolas', 'Monaco', monospace;
-            color: #667eea;
-            font-weight: 600;
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--dark);
+            font-weight: 500;
         }
 
         .flag-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 12px;
+            padding: 14px 18px;
+            background: var(--light);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 0.875rem;
+            border-left: 3px solid;
         }
 
-        .flag-icon {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
+        .flag-item.true {
+            border-color: #f87171;
+            background: #fef2f2;
         }
 
-        .flag-icon.true {
-            background: #f8d7da;
-            color: #721c24;
+        .flag-item.false {
+            border-color: #34d399;
+            background: #d1fae5;
         }
 
-        .flag-icon.false {
-            background: #d4edda;
-            color: #155724;
+        .flag-item .material-icons {
+            font-size: 20px;
         }
 
-        .error {
-            display: none;
-            background: #f8d7da;
-            color: #721c24;
-            padding: 16px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border-left: 4px solid #dc3545;
+        .flag-item.true .material-icons {
+            color: #dc2626;
         }
 
-        .error.active {
-            display: block;
-        }
-
-        .examples {
-            margin-top: 12px;
-        }
-
-        .example-btn {
-            display: inline-block;
-            padding: 6px 12px;
-            margin: 4px;
-            background: #f0f0f0;
-            border: 1px solid #d0d0d0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .example-btn:hover {
-            background: #e0e0e0;
-            border-color: #667eea;
+        .flag-item.false .material-icons {
+            color: #059669;
         }
 
         .metadata-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 12px;
+            gap: 16px;
         }
 
         .metadata-item {
             text-align: center;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 12px;
+            border: 1px solid var(--light-gray);
+            transition: all 0.3s ease;
+        }
+
+        .metadata-item:hover {
+            border-color: var(--accent);
         }
 
         .metadata-item .label {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 4px;
+            font-size: 0.75rem;
+            color: var(--dark-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
         }
 
         .metadata-item .value {
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: 700;
-            color: #667eea;
+            color: var(--accent);
+            font-family: 'IBM Plex Mono', monospace;
         }
 
         .failure-reasons {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 12px;
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .failure-reasons-title {
+            font-size: 0.813rem;
+            color: #92400e;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
         }
 
         .failure-reasons ul {
@@ -421,158 +679,275 @@
         }
 
         .failure-reasons li {
-            padding: 4px 0;
-            color: #856404;
+            padding: 6px 0;
+            color: #78350f;
+            font-size: 0.875rem;
         }
 
         .failure-reasons li::before {
-            content: "⚠ ";
+            content: '• ';
+            color: #f59e0b;
             margin-right: 8px;
+            font-weight: 700;
+        }
+
+        .error {
+            display: none;
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px 20px;
+            margin-top: 20px;
+            border-left: 4px solid #dc2626;
+            border-radius: 10px;
+            font-size: 0.875rem;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        .error::before {
+            content: '⚠ ';
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        .placeholder-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--dark-muted);
+        }
+
+        .placeholder-state .material-icons {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+            color: var(--accent);
+        }
+
+        .placeholder-state p {
+            font-size: 0.938rem;
+            font-weight: 500;
+        }
+
+        .token-count {
+            display: inline-block;
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.813rem;
+            margin-left: 8px;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--light-gray);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>WhatsApp Anonymization Pipeline</h1>
-            <p>High-accuracy PII detection and redaction using spaCy + Microsoft Presidio</p>
+            <div class="logo-badge">
+                <span class="material-icons">shield</span>
+                PII Protection
+            </div>
+            <h1>WhatsApp <span class="highlight">Anonymization</span> Platform</h1>
+            <p class="subtitle">Advanced NER-powered PII detection using spaCy and Microsoft Presidio</p>
         </div>
 
-        <div class="main-content">
-            <!-- Input Section -->
+        <div class="main-grid">
+            <!-- Input Panel -->
             <div class="card">
-                <h2>Input Message</h2>
-
-                <div class="form-group">
-                    <label for="rawText">WhatsApp Message *</label>
-                    <textarea id="rawText" placeholder="[26/02/2026, 09:14] Sarah: My email is sarah@test.com" required></textarea>
-                    <small>Paste your WhatsApp message including timestamp and sender</small>
+                <div class="card-header">
+                    <span class="material-icons">edit_note</span>
+                    <h2>Message Input</h2>
                 </div>
+                <div class="card-content">
+                    <div class="form-group">
+                        <label>
+                            <span class="material-icons">message</span>
+                            WhatsApp Message <span class="required">*</span>
+                        </label>
+                        <textarea id="rawText" placeholder="[26/02/2026, 09:14] Sarah: My email is sarah@test.com" required></textarea>
+                        <small>Paste your WhatsApp message with timestamp and sender</small>
+                    </div>
 
-                <div class="form-group">
-                    <label for="blocklist">Custom Blocklist (Optional)</label>
-                    <input type="text" id="blocklist" placeholder="Susi, Mo, confidential">
-                    <small>Comma-separated list of terms to always redact</small>
+                    <div class="form-group">
+                        <label>
+                            <span class="material-icons">block</span>
+                            Custom Blocklist
+                        </label>
+                        <input type="text" id="blocklist" placeholder="Susi, Mo, confidential">
+                        <small>Comma-separated terms to always redact</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="material-icons">badge</span>
+                            Session ID
+                        </label>
+                        <input type="text" id="sessionId" value="test_session_01">
+                        <small>Unique identifier for tracking</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="material-icons">settings_ethernet</span>
+                            API Endpoint
+                        </label>
+                        <input type="text" id="apiUrl" value="http://localhost:8000/api/anonymise">
+                        <small>Update for production deployment</small>
+                    </div>
+
+                    <div class="examples">
+                        <div class="examples-label">
+                            <span class="material-icons">science</span>
+                            Quick Examples
+                        </div>
+                        <button class="example-btn" onclick="loadExample(1)">Basic Email</button>
+                        <button class="example-btn" onclick="loadExample(2)">Phone + Handle</button>
+                        <button class="example-btn" onclick="loadExample(3)">Blocklist</button>
+                        <button class="example-btn" onclick="loadExample(4)">Clean Text</button>
+                        <button class="example-btn" onclick="loadExample(5)">German NER</button>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="anonymize()" id="submitBtn">
+                            Anonymize Message
+                        </button>
+                        <button class="btn-secondary" onclick="clearForm()">
+                            Clear
+                        </button>
+                    </div>
+
+                    <div class="error" id="error"></div>
                 </div>
-
-                <div class="form-group">
-                    <label for="sessionId">Session ID</label>
-                    <input type="text" id="sessionId" value="test_session_01">
-                    <small>Identifier for tracking purposes</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="apiUrl">API Endpoint</label>
-                    <input type="text" id="apiUrl" value="http://localhost:8000/api/anonymise">
-                    <small>Change to your deployed URL when testing production</small>
-                </div>
-
-                <div class="examples">
-                    <small><strong>Quick Examples:</strong></small><br>
-                    <button class="example-btn" onclick="loadExample(1)">Basic Email</button>
-                    <button class="example-btn" onclick="loadExample(2)">Phone + Handle</button>
-                    <button class="example-btn" onclick="loadExample(3)">Blocklist</button>
-                    <button class="example-btn" onclick="loadExample(4)">Clean Message</button>
-                    <button class="example-btn" onclick="loadExample(5)">German Text</button>
-                </div>
-
-                <div class="button-group" style="margin-top: 24px;">
-                    <button class="btn-primary" onclick="anonymize()" id="submitBtn">
-                        Anonymize Message
-                    </button>
-                    <button class="btn-secondary" onclick="clearForm()">
-                        Clear
-                    </button>
-                </div>
-
-                <div class="error" id="error"></div>
             </div>
 
-            <!-- Results Section -->
+            <!-- Results Panel -->
             <div class="card">
-                <h2>Results</h2>
-
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    <p>Processing message...</p>
+                <div class="card-header">
+                    <span class="material-icons">analytics</span>
+                    <h2>Analysis Results</h2>
                 </div>
-
-                <div class="results" id="results">
-                    <div class="result-section">
-                        <h3>Cleaned Text</h3>
-                        <div class="cleaned-text" id="cleanedText"></div>
+                <div class="card-content">
+                    <div class="loading" id="loading">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Analyzing message</div>
                     </div>
 
-                    <div class="result-section">
-                        <h3>Confidence & Routing</h3>
-                        <div>
-                            <strong>Routing Decision:</strong>
-                            <span class="routing-badge" id="routingBadge"></span>
-                        </div>
-                        <div class="confidence-score" id="confidenceScore"></div>
-
-                        <div class="signals-grid">
-                            <div class="signal-item">
-                                <label>Regex Coverage</label>
-                                <div class="value" id="regexCoverage">-</div>
-                            </div>
-                            <div class="signal-item">
-                                <label>NER Confidence</label>
-                                <div class="value" id="nerConfidence">-</div>
-                            </div>
-                            <div class="signal-item">
-                                <label>QI Count</label>
-                                <div class="value" id="qiCount">-</div>
-                            </div>
-                            <div class="signal-item">
-                                <label>Residual Density</label>
-                                <div class="value" id="residualDensity">-</div>
-                            </div>
+                    <div class="results" id="results">
+                        <div class="result-section">
+                            <h3>
+                                <span class="material-icons">description</span>
+                                Anonymized Output
+                            </h3>
+                            <div class="cleaned-text" id="cleanedText"></div>
                         </div>
 
-                        <div id="failureReasonsContainer"></div>
+                        <div class="result-section">
+                            <h3>
+                                <span class="material-icons">verified</span>
+                                Confidence Score
+                            </h3>
+                            <div class="routing-section">
+                                <div class="confidence-display">
+                                    <div class="confidence-score" id="confidenceScore">--</div>
+                                    <div class="confidence-label">Overall Confidence</div>
+                                </div>
+                                <div class="routing-info">
+                                    <div class="routing-info-label">Routing Decision</div>
+                                    <div class="routing-badge" id="routingBadge">Awaiting Data</div>
+                                </div>
+                            </div>
+
+                            <div class="signals-grid">
+                                <div class="signal-item">
+                                    <label>Regex Coverage</label>
+                                    <div class="value" id="regexCoverage">--</div>
+                                </div>
+                                <div class="signal-item">
+                                    <label>NER Confidence</label>
+                                    <div class="value" id="nerConfidence">--</div>
+                                </div>
+                                <div class="signal-item">
+                                    <label>QI Count</label>
+                                    <div class="value" id="qiCount">--</div>
+                                </div>
+                                <div class="signal-item">
+                                    <label>Residual Density</label>
+                                    <div class="value" id="residualDensity">--</div>
+                                </div>
+                            </div>
+
+                            <div id="failureReasonsContainer"></div>
+                        </div>
+
+                        <div class="result-section">
+                            <h3>
+                                <span class="material-icons">label</span>
+                                Detected Tokens<span class="token-count" id="tokenCount">0</span>
+                            </h3>
+                            <div style="overflow-x: auto;">
+                                <table class="tokens-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Value</th>
+                                            <th>Position</th>
+                                            <th>Confidence</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tokensBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="result-section">
+                            <h3>
+                                <span class="material-icons">flag</span>
+                                Flags & Statistics
+                            </h3>
+                            <div id="flags"></div>
+                            <div class="metadata-grid">
+                                <div class="metadata-item">
+                                    <div class="label">Original Words</div>
+                                    <div class="value" id="originalWords">--</div>
+                                </div>
+                                <div class="metadata-item">
+                                    <div class="label">Cleaned Words</div>
+                                    <div class="value" id="cleanedWords">--</div>
+                                </div>
+                                <div class="metadata-item">
+                                    <div class="label">Redacted %</div>
+                                    <div class="value" id="redactedPercent">--</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="result-section">
-                        <h3>Detected Tokens (<span id="tokenCount">0</span>)</h3>
-                        <div style="overflow-x: auto;">
-                            <table class="tokens-table" id="tokensTable">
-                                <thead>
-                                    <tr>
-                                        <th>Type</th>
-                                        <th>Value</th>
-                                        <th>Position</th>
-                                        <th>Confidence</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tokensBody">
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="placeholder-state">
+                        <span class="material-icons">pending_actions</span>
+                        <p>Submit a message to view analysis results</p>
                     </div>
-
-                    <div class="result-section">
-                        <h3>Flags & Metadata</h3>
-                        <div id="flags"></div>
-                        <div class="metadata-grid">
-                            <div class="metadata-item">
-                                <div class="label">Original Words</div>
-                                <div class="value" id="originalWords">-</div>
-                            </div>
-                            <div class="metadata-item">
-                                <div class="label">Cleaned Words</div>
-                                <div class="value" id="cleanedWords">-</div>
-                            </div>
-                            <div class="metadata-item">
-                                <div class="label">Redacted</div>
-                                <div class="value" id="redactedPercent">-</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="text-align: center; color: #999; margin-top: 20px;">
-                    <small>Awaiting input...</small>
                 </div>
             </div>
         </div>
@@ -620,6 +995,7 @@
             document.getElementById('sessionId').value = 'test_session_01';
             document.getElementById('results').classList.remove('active');
             document.getElementById('error').classList.remove('active');
+            document.querySelector('.placeholder-state').style.display = 'block';
         }
 
         async function anonymize() {
@@ -628,7 +1004,6 @@
             const sessionId = document.getElementById('sessionId').value.trim();
             const apiUrl = document.getElementById('apiUrl').value.trim();
 
-            // Validation
             if (!rawText) {
                 showError('Please enter a message to anonymize');
                 return;
@@ -639,11 +1014,11 @@
                 return;
             }
 
-            // Show loading
             document.getElementById('loading').classList.add('active');
             document.getElementById('results').classList.remove('active');
             document.getElementById('error').classList.remove('active');
             document.getElementById('submitBtn').disabled = true;
+            document.querySelector('.placeholder-state').style.display = 'none';
 
             try {
                 const response = await fetch(apiUrl, {
@@ -669,6 +1044,7 @@
             } catch (error) {
                 console.error('Error:', error);
                 showError(`Failed to anonymize: ${error.message}`);
+                document.querySelector('.placeholder-state').style.display = 'block';
             } finally {
                 document.getElementById('loading').classList.remove('active');
                 document.getElementById('submitBtn').disabled = false;
@@ -682,22 +1058,18 @@
         }
 
         function displayResults(result) {
-            // Show results container
             document.getElementById('results').classList.add('active');
 
-            // Cleaned text
             document.getElementById('cleanedText').textContent = result.cleanedText;
 
-            // Routing and confidence
             const routing = result.confidence.routing;
             const badge = document.getElementById('routingBadge');
-            badge.textContent = routing;
+            badge.textContent = routing.replace('_', ' ').toUpperCase();
             badge.className = `routing-badge routing-${routing}`;
 
             document.getElementById('confidenceScore').textContent =
-                `${(result.confidence.overall * 100).toFixed(1)}%`;
+                `${(result.confidence.overall * 100).toFixed(0)}%`;
 
-            // Signals
             const signals = result.confidence.signals;
             document.getElementById('regexCoverage').textContent =
                 (signals.regexCoverage * 100).toFixed(0) + '%';
@@ -707,12 +1079,11 @@
             document.getElementById('residualDensity').textContent =
                 (signals.residualTokenDensity * 100).toFixed(0) + '%';
 
-            // Failure reasons
             const failureReasonsContainer = document.getElementById('failureReasonsContainer');
             if (result.confidence.failureReasons && result.confidence.failureReasons.length > 0) {
                 failureReasonsContainer.innerHTML = `
                     <div class="failure-reasons">
-                        <strong>Issues Detected:</strong>
+                        <div class="failure-reasons-title">Issues Detected</div>
                         <ul>
                             ${result.confidence.failureReasons.map(r => `<li>${r}</li>`).join('')}
                         </ul>
@@ -722,12 +1093,11 @@
                 failureReasonsContainer.innerHTML = '';
             }
 
-            // Tokens
             document.getElementById('tokenCount').textContent = result.tokens.length;
             const tokensBody = document.getElementById('tokensBody');
 
             if (result.tokens.length === 0) {
-                tokensBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">No tokens detected</td></tr>';
+                tokensBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--dark-muted);">No PII tokens detected</td></tr>';
             } else {
                 tokensBody.innerHTML = result.tokens.map(token => `
                     <tr>
@@ -739,24 +1109,18 @@
                 `).join('');
             }
 
-            // Flags
             const flags = document.getElementById('flags');
             flags.innerHTML = `
-                <div class="flag-item">
-                    <div class="flag-icon ${!result.flags.quasi_identifier_risk}">
-                        ${result.flags.quasi_identifier_risk ? '✗' : '✓'}
-                    </div>
-                    <span>Quasi-identifier Risk: ${result.flags.quasi_identifier_risk ? 'Yes' : 'No'}</span>
+                <div class="flag-item ${!result.flags.quasi_identifier_risk}">
+                    <span class="material-icons">${result.flags.quasi_identifier_risk ? 'warning' : 'check_circle'}</span>
+                    <span>Quasi-identifier Risk: ${result.flags.quasi_identifier_risk ? 'Detected' : 'Clear'}</span>
                 </div>
-                <div class="flag-item">
-                    <div class="flag-icon ${!result.flags.low_signal}">
-                        ${result.flags.low_signal ? '✗' : '✓'}
-                    </div>
+                <div class="flag-item ${!result.flags.low_signal}">
+                    <span class="material-icons">${result.flags.low_signal ? 'warning' : 'check_circle'}</span>
                     <span>Low Signal: ${result.flags.low_signal ? 'Yes' : 'No'}</span>
                 </div>
             `;
 
-            // Metadata
             document.getElementById('originalWords').textContent = result.metadata.original_word_count;
             document.getElementById('cleanedWords').textContent = result.metadata.cleaned_word_count;
 
@@ -764,7 +1128,6 @@
             document.getElementById('redactedPercent').textContent = redactedPercent + '%';
         }
 
-        // Allow Enter key to submit (with Ctrl/Cmd modifier to avoid interfering with textarea)
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 anonymize();
