@@ -1,10 +1,10 @@
-# WhatsApp Anonymization Pipeline (Python)
+# Text Anonymization Platform (Python)
 
-A serverless Python implementation of WhatsApp message anonymization using spaCy and Microsoft Presidio for high-accuracy PII detection and redaction.
+A serverless Python implementation of text message anonymization using spaCy and Microsoft Presidio for high-accuracy PII detection and redaction.
 
 ## Overview
 
-This system processes WhatsApp chat messages, detects and redacts PII (names, emails, phone numbers, locations, etc.), and provides confidence scoring for routing decisions. Built for accuracy benchmarking against TypeScript implementations.
+This system processes text messages from various sources (chat apps, SMS, emails, etc.), detects and redacts PII (names, emails, phone numbers, locations, etc.), and provides confidence scoring for routing decisions. Supports multiple text formats including WhatsApp, Telegram, Slack, and plain text.
 
 ### Key Features
 
@@ -21,7 +21,7 @@ This system processes WhatsApp chat messages, detects and redacts PII (names, em
 ### Pipeline Stages
 
 1. **Regex Stripper** - Extracts structural PII using patterns:
-   - WhatsApp headers (timestamp + sender)
+   - Message headers (timestamp + sender from various formats)
    - Phone numbers (using google-libphonenumber)
    - Email addresses (including obfuscated formats)
    - URLs and social media handles

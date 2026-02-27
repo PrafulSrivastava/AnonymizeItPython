@@ -52,10 +52,10 @@ psql whatsapp_anonymizer < migrations/001_initial_schema.sql
 ## Step 3: Set Up Google OAuth (5 min)
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create project: "WhatsApp Anonymizer"
+2. Create project: "Text Anonymization Platform"
 3. Enable Google+ API
 4. OAuth consent screen:
-   - App name: "WhatsApp Anonymization Platform"
+   - App name: "Text Anonymization Platform"
    - Scopes: email, profile, openid
 5. Create OAuth Client:
    - Type: Web application

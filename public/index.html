@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp PII Anonymization Platform</title>
+    <title>Text Anonymization Platform - PII Detection & Redaction</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -932,8 +932,8 @@
                 <span class="material-icons">shield</span>
                 PII Protection
             </div>
-            <h1>WhatsApp <span class="highlight">Anonymization</span> Platform</h1>
-            <p class="subtitle">Advanced NER-powered PII detection using spaCy and Microsoft Presidio</p>
+            <h1>Text <span class="highlight">Anonymization</span> Platform</h1>
+            <p class="subtitle">Advanced NER-powered PII detection for chat messages, SMS, emails, and text data</p>
         </div>
 
         <div class="main-grid">
@@ -947,10 +947,10 @@
                     <div class="form-group">
                         <label>
                             <span class="material-icons">message</span>
-                            WhatsApp Message <span class="required">*</span>
+                            Text Message <span class="required">*</span>
                         </label>
                         <textarea id="rawText" placeholder="[26/02/2026, 09:14] Sarah: My email is sarah@test.com" required></textarea>
-                        <small>Paste your WhatsApp message with timestamp and sender</small>
+                        <small>Paste any text containing personal information (chat messages, emails, SMS, etc.)</small>
                     </div>
 
                     <div class="form-group">
@@ -985,11 +985,11 @@
                             <span class="material-icons">science</span>
                             Quick Examples
                         </div>
-                        <button class="example-btn" onclick="loadExample(1)">Basic Email</button>
-                        <button class="example-btn" onclick="loadExample(2)">Phone + Handle</button>
-                        <button class="example-btn" onclick="loadExample(3)">Blocklist</button>
+                        <button class="example-btn" onclick="loadExample(1)">Chat Message</button>
+                        <button class="example-btn" onclick="loadExample(2)">Phone + Social</button>
+                        <button class="example-btn" onclick="loadExample(3)">Custom Blocklist</button>
                         <button class="example-btn" onclick="loadExample(4)">Clean Text</button>
-                        <button class="example-btn" onclick="loadExample(5)">German NER</button>
+                        <button class="example-btn" onclick="loadExample(5)">Multi-Language</button>
                     </div>
 
                     <div class="button-group">

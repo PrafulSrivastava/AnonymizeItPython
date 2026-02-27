@@ -1,6 +1,7 @@
 """
 API Entry Point: FastAPI application with Vercel serverless support.
-Provides /api/anonymise endpoint for WhatsApp message anonymization.
+Provides /api/anonymise endpoint for text message anonymization and PII detection.
+Supports chat messages, SMS, emails, and any text containing personal information.
 Includes OAuth authentication and usage tracking.
 """
 
@@ -37,8 +38,8 @@ from lib.usage.tracker import (
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="WhatsApp Anonymization API",
-    description="PII detection and redaction for WhatsApp messages",
+    title="Text Anonymization API",
+    description="Advanced PII detection and redaction for chat messages, SMS, emails, and text data using NER and ML",
     version="1.0.0"
 )
 
@@ -94,8 +95,9 @@ async def root():
     # Fallback to API info (for Vercel or if file not found)
     return {
         "status": "ok",
-        "service": "WhatsApp Anonymization API",
-        "version": "1.0.0"
+        "service": "Text Anonymization API",
+        "version": "1.0.0",
+        "description": "PII detection and redaction for chat messages, SMS, emails, and text data"
     }
 
 
@@ -225,7 +227,8 @@ async def anonymise(
     user: Optional[User] = Depends(optional_user)
 ):
     """
-    Anonymize WhatsApp message by detecting and redacting PII.
+    Anonymize text messages by detecting and redacting personally identifiable information (PII).
+    Supports chat messages, SMS, emails, and any text containing personal data.
     Includes usage tracking and quota enforcement.
 
     Anonymous users: Limited to FREE_TIER_LIMIT requests
