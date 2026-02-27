@@ -1,6 +1,6 @@
 # OAuth Authentication & Usage Tracking Setup Guide
 
-This guide will walk you through setting up OAuth authentication with Google and usage tracking for the WhatsApp Anonymization API.
+This guide will walk you through setting up OAuth authentication with Google and usage tracking for the Text Anonymization API.
 
 ## Overview
 
@@ -64,7 +64,7 @@ WHERE table_schema = 'public';
 ### 2.1 Create Google Cloud Project
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project: **"WhatsApp Anonymizer"**
+2. Create a new project: **"Text Anonymization Platform"**
 3. Enable **Google+ API** (or Google Identity Platform)
 
 ### 2.2 Configure OAuth Consent Screen
@@ -72,7 +72,7 @@ WHERE table_schema = 'public';
 1. Navigate to **APIs & Services** → **OAuth consent screen**
 2. Select **External** user type
 3. Fill in application details:
-   - **App name**: WhatsApp Anonymization Platform
+   - **App name**: Text Anonymization Platform
    - **User support email**: Your email
    - **Developer contact**: Your email
 4. Add scopes:
@@ -88,7 +88,7 @@ WHERE table_schema = 'public';
 2. Click **Create Credentials** → **OAuth 2.0 Client ID**
 3. Select **Web application**
 4. Configure:
-   - **Name**: WhatsApp Anonymizer Web Client
+   - **Name**: Text Anonymization Web Client
    - **Authorized JavaScript origins**:
      ```
      http://localhost:8000
