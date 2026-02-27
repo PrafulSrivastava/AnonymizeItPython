@@ -7,12 +7,15 @@
   },
   "routes": [
     {
-      "src": "/api/anonymise",
+      "src": "/api/(.*)",
       "dest": "/api/anonymise.py"
     },
     {
       "src": "/",
       "dest": "/public/index.html"
     }
-  ]
+  ],
+  "env": {
+    "FREE_TIER_LIMIT": "5"
+  }
 }

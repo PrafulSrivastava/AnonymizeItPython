@@ -741,6 +741,147 @@
             margin-left: 8px;
         }
 
+        /* Authentication UI */
+        .auth-section {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .usage-info {
+            font-size: 0.813rem;
+            color: var(--dark-muted);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .btn-login {
+            background: white;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-login:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.875rem;
+        }
+
+        .btn-logout {
+            background: var(--light);
+            color: var(--dark-muted);
+            border: 1px solid var(--light-gray);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.813rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .btn-logout:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            border-color: #dc2626;
+        }
+
+        /* Login Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 450px;
+            text-align: center;
+            animation: scaleIn 0.3s ease-out;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal h3 {
+            font-size: 1.75rem;
+            margin-bottom: 16px;
+            color: var(--dark);
+        }
+
+        .modal p {
+            font-size: 1rem;
+            color: var(--dark-muted);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal-buttons button {
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
         /* Scrollbar styling */
         ::-webkit-scrollbar {
             width: 10px;
@@ -762,6 +903,29 @@
     </style>
 </head>
 <body>
+    <!-- Authentication Section -->
+    <div class="auth-section" id="authSection">
+        <!-- Logged out state -->
+        <div id="loggedOut" style="display: none;">
+            <div class="usage-info">
+                <span id="anonymousUsage">0</span> / 5 free requests used
+            </div>
+            <button class="btn-login" onclick="login()">
+                <span class="material-icons" style="font-size: 18px;">login</span>
+                Login with Google
+            </button>
+        </div>
+
+        <!-- Logged in state -->
+        <div id="loggedIn" style="display: none;">
+            <div class="user-info">
+                <img id="userAvatar" class="avatar" src="" alt="User">
+                <span class="user-name" id="userName"></span>
+            </div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <div class="logo-badge">
@@ -954,6 +1118,107 @@
     </div>
 
     <script>
+        // Authentication functions
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/me', {
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    showLoggedIn(user);
+                } else {
+                    showLoggedOut();
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                showLoggedOut();
+            }
+
+            // Fetch and update usage stats
+            updateUsageDisplay();
+        }
+
+        async function updateUsageDisplay() {
+            try {
+                const response = await fetch('/api/auth/usage', {
+                    credentials: 'include'
+                });
+                const usage = await response.json();
+
+                if (!usage.is_authenticated) {
+                    document.getElementById('anonymousUsage').textContent = usage.requests_used;
+                }
+            } catch (error) {
+                console.error('Failed to fetch usage:', error);
+            }
+        }
+
+        function showLoggedIn(user) {
+            document.getElementById('loggedOut').style.display = 'none';
+            document.getElementById('loggedIn').style.display = 'block';
+            document.getElementById('userName').textContent = user.name || user.email;
+            if (user.picture_url) {
+                document.getElementById('userAvatar').src = user.picture_url;
+            }
+        }
+
+        function showLoggedOut() {
+            document.getElementById('loggedOut').style.display = 'block';
+            document.getElementById('loggedIn').style.display = 'none';
+        }
+
+        function login() {
+            window.location.href = '/api/auth/login';
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                window.location.reload();
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.reload();
+            }
+        }
+
+        function showLoginModal() {
+            const modalHtml = `
+                <div class="modal-overlay" onclick="closeModal(event)">
+                    <div class="modal" onclick="event.stopPropagation()">
+                        <span class="material-icons" style="font-size: 64px; color: var(--accent); margin-bottom: 20px;">lock</span>
+                        <h3>Free Tier Limit Reached</h3>
+                        <p>You've used all 5 free requests. Login with Google to continue with unlimited access.</p>
+                        <div class="modal-buttons">
+                            <button class="btn-primary" onclick="login()" style="flex: 1;">
+                                <span style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                                    <span class="material-icons" style="font-size: 18px;">login</span>
+                                    Login with Google
+                                </span>
+                            </button>
+                            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function closeModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Initialize auth on page load
+        document.addEventListener('DOMContentLoaded', checkAuth);
+
         const examples = {
             1: {
                 rawText: "[26/02/2026, 09:14] Sarah Müller: My email is sarah.mueller@gmail.com",
@@ -1026,12 +1291,21 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',  // Include cookies for authentication
                     body: JSON.stringify({
                         rawText,
                         blocklist,
                         sessionId
                     })
                 });
+
+                // Handle authentication errors
+                if (response.status === 401) {
+                    const errorData = await response.json();
+                    showLoginModal();
+                    document.querySelector('.placeholder-state').style.display = 'block';
+                    return;
+                }
 
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -1040,6 +1314,9 @@
 
                 const data = await response.json();
                 displayResults(data.result);
+
+                // Update usage display after successful request
+                updateUsageDisplay();
 
             } catch (error) {
                 console.error('Error:', error);
