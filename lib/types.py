@@ -19,7 +19,7 @@ RoutingDecision = Literal["pass", "pass_flagged", "review"]
 
 class PipelineInput(BaseModel):
     """Request body for anonymization endpoint."""
-    rawText: str = Field(..., max_length=500, description="Raw WhatsApp message text")
+    rawText: str = Field(..., description="Raw WhatsApp message text")
     blocklist: str = Field(default="", description="Comma-separated list of terms to redact")
     sessionId: str = Field(..., description="Session identifier for tracking")
 
