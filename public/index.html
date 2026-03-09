@@ -898,13 +898,147 @@
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent);
+            background: var(--dark-muted);
+        }
+
+        /* ── Tab switcher ──────────────────────────────────────────────────── */
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: var(--light);
+            padding: 6px;
+            border-radius: 12px;
+            width: fit-content;
+        }
+
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--dark-muted);
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn .material-icons { font-size: 18px; }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--accent);
+            box-shadow: 0 2px 8px rgba(15,23,42,.08);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--dark);
+            background: rgba(255,255,255,.6);
+        }
+
+        /* ── DLT upload zone ───────────────────────────────────────────────── */
+        .upload-zone {
+            border: 2px dashed var(--light-gray);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--light);
+            position: relative;
+        }
+
+        .upload-zone:hover, .upload-zone.drag-over {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+        }
+
+        .upload-zone .material-icons { font-size: 48px; color: var(--accent); opacity: 0.6; }
+        .upload-zone .upload-label { font-weight: 600; color: var(--dark); margin-top: 12px; }
+        .upload-zone .upload-hint  { font-size: 0.8rem; color: var(--dark-muted); margin-top: 6px; }
+        .upload-zone .file-chosen  { font-size: 0.85rem; color: var(--accent); font-weight: 600;
+                                     margin-top: 8px; font-family: 'IBM Plex Mono', monospace; }
+
+        /* ── DLT results ───────────────────────────────────────────────────── */
+        .risk-banner {
+            border-radius: 12px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .risk-SAFE   { background: #d1fae5; color: #065f46; }
+        .risk-LOW    { background: #fef9c3; color: #713f12; }
+        .risk-MEDIUM { background: #fff7ed; color: #9a3412; }
+        .risk-HIGH   { background: #fee2e2; color: #991b1b; }
+        .risk-UNKNOWN{ background: #f1f5f9; color: #475569; }
+
+        .risk-banner .risk-icon  { font-size: 40px; }
+        .risk-banner .risk-level { font-size: 1.75rem; font-weight: 700; }
+        .risk-banner .risk-desc  { font-size: 0.875rem; margin-top: 4px; opacity: 0.9; }
+
+        .dlt-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .dlt-stat { background: var(--light); border-radius: 10px; padding: 16px;
+                    text-align: center; border: 1px solid var(--light-gray); }
+        .dlt-stat .num { font-size: 1.75rem; font-weight: 700; color: var(--dark);
+                         font-family: 'IBM Plex Mono', monospace; }
+        .dlt-stat .lbl { font-size: 0.72rem; color: var(--dark-muted); text-transform: uppercase;
+                         letter-spacing: .05em; margin-top: 4px; font-weight: 600; }
+        .dlt-stat .num.pass   { color: #059669; }
+        .dlt-stat .num.flag   { color: #d97706; }
+        .dlt-stat .num.review { color: #dc2626; }
+
+        .dlt-section-title {
+            font-size: 0.875rem; font-weight: 600; color: var(--dark);
+            text-transform: uppercase; letter-spacing: .05em;
+            display: flex; align-items: center; gap: 6px;
+            margin: 20px 0 12px;
+        }
+
+        .dlt-section-title .material-icons { font-size: 18px; color: var(--accent); }
+
+        .dlt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .dlt-table th, .dlt-table td { padding: 10px 12px; border-bottom: 1px solid var(--light-gray); text-align: left; }
+        .dlt-table th { background: var(--light); font-weight: 600; font-size: 0.78rem;
+                        text-transform: uppercase; letter-spacing: .04em; }
+        .dlt-table tr:last-child td { border-bottom: none; }
+        .dlt-table tbody tr:hover { background: var(--light); }
+
+        .recs-list { list-style: none; padding: 0; }
+        .recs-list li { padding: 8px 0 8px 0; font-size: 0.875rem; border-bottom: 1px solid var(--light-gray); }
+        .recs-list li:last-child { border-bottom: none; }
+        .recs-list li::before { content: '→  '; font-weight: 700; color: var(--accent); }
+
+        .dlt-routing-pass        { color: #059669; font-weight: 600; }
+        .dlt-routing-pass_flagged{ color: #d97706; font-weight: 600; }
+        .dlt-routing-review      { color: #dc2626; font-weight: 600; }
+
+        .payload-cell {
+            max-width: 260px; overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap; font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem;
+            cursor: help;
         }
     </style>
 </head>
 <body>
     <!-- Authentication Section -->
-    <div class="auth-section" id="authSection">
+    <div class="auth-section" id="authSection" style="display: none;">
         <!-- Logged out state -->
         <div id="loggedOut" style="display: none;">
             <div class="usage-info">
@@ -936,14 +1070,34 @@
             <p class="subtitle">Advanced NER-powered PII detection for chat messages, SMS, emails, and text data</p>
         </div>
 
+        <!-- Tab switcher -->
+        <div class="tab-bar">
+            <button class="tab-btn active" id="tabText" onclick="switchTab('text')">
+                <span class="material-icons">edit_note</span> Message
+            </button>
+            <button class="tab-btn" id="tabDlt" onclick="switchTab('dlt')">
+                <span class="material-icons">article</span> DLT Log Scanner
+            </button>
+        </div>
+
         <div class="main-grid">
             <!-- Input Panel -->
             <div class="card">
-                <div class="card-header">
+
+                <!-- ── Text tab header ── -->
+                <div class="card-header" id="textTabHeader">
                     <span class="material-icons">edit_note</span>
                     <h2>Message Input</h2>
                 </div>
-                <div class="card-content">
+
+                <!-- ── DLT tab header ── -->
+                <div class="card-header" id="dltTabHeader" style="display:none">
+                    <span class="material-icons">article</span>
+                    <h2>DLT Log Scanner</h2>
+                </div>
+
+                <!-- ── Text tab content ── -->
+                <div class="card-content" id="textPanel">
                     <div class="form-group">
                         <label>
                             <span class="material-icons">message</span>
@@ -1003,15 +1157,66 @@
 
                     <div class="error" id="error"></div>
                 </div>
+
+                <!-- ── DLT tab content ── -->
+                <div class="card-content" id="dltPanel" style="display:none">
+                    <div class="form-group">
+                        <label><span class="material-icons">upload_file</span> DLT Log File <span class="required">*</span></label>
+                        <div class="upload-zone" id="uploadZone">
+                            <input type="file" id="dltFile" accept=".dlt,.txt,.log,.csv"
+                                   onchange="onFileChosen(this)">
+                            <span class="material-icons">cloud_upload</span>
+                            <div class="upload-label">Drop .dlt file here or click to browse</div>
+                            <div class="upload-hint">Binary .dlt or DLT Viewer text export (.txt / .log)</div>
+                            <div class="file-chosen" id="fileChosen"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><span class="material-icons">block</span> Custom Blocklist</label>
+                        <input type="text" id="dltBlocklist" placeholder="alice, acme-corp, project-x">
+                        <small>Comma-separated terms to always treat as PII</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label><span class="material-icons">filter_list</span> Max Entries</label>
+                        <input type="number" id="dltSample" value="0" min="0">
+                        <small>0 = scan all entries (use a smaller number for a quick preview)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label><span class="material-icons">settings_ethernet</span> API Endpoint</label>
+                        <input type="text" id="dltApiUrl" value="http://localhost:8000/api/dlt/scan">
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="scanDlt()" id="dltSubmitBtn">
+                            Scan for PII
+                        </button>
+                        <button class="btn-secondary" onclick="clearDlt()">Clear</button>
+                    </div>
+
+                    <div class="error" id="dltError"></div>
+                </div>
             </div>
 
             <!-- Results Panel -->
             <div class="card">
-                <div class="card-header">
+
+                <!-- ── Text results header ── -->
+                <div class="card-header" id="textResultsHeader">
                     <span class="material-icons">analytics</span>
                     <h2>Analysis Results</h2>
                 </div>
-                <div class="card-content">
+
+                <!-- ── DLT results header ── -->
+                <div class="card-header" id="dltResultsHeader" style="display:none">
+                    <span class="material-icons">policy</span>
+                    <h2>DLT Scan Report</h2>
+                </div>
+
+                <!-- ── Text results content ── -->
+                <div class="card-content" id="textResultsContent">
                     <div class="loading" id="loading">
                         <div class="loading-spinner"></div>
                         <div class="loading-text">Analyzing message</div>
@@ -1113,6 +1318,22 @@
                         <p>Submit a message to view analysis results</p>
                     </div>
                 </div>
+
+                <!-- ── DLT results content ── -->
+                <div class="card-content" id="dltResultsContent" style="display:none">
+                    <div class="loading" id="dltLoading">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Scanning DLT log…</div>
+                    </div>
+
+                    <div id="dltResults" style="display:none"></div>
+
+                    <div class="placeholder-state" id="dltPlaceholder">
+                        <span class="material-icons">article</span>
+                        <p>Upload a DLT file to view the anonymization report</p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -1407,9 +1628,197 @@
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                anonymize();
+                if (document.getElementById('tabText').classList.contains('active')) {
+                    anonymize();
+                } else {
+                    scanDlt();
+                }
             }
         });
+
+        // ── Tab switcher ──────────────────────────────────────────────────────
+        function switchTab(tab) {
+            const isText = tab === 'text';
+
+            // Tab buttons
+            document.getElementById('tabText').classList.toggle('active', isText);
+            document.getElementById('tabDlt').classList.toggle('active', !isText);
+
+            // Left card
+            document.getElementById('textTabHeader').style.display  = isText ? '' : 'none';
+            document.getElementById('dltTabHeader').style.display   = isText ? 'none' : '';
+            document.getElementById('textPanel').style.display      = isText ? '' : 'none';
+            document.getElementById('dltPanel').style.display       = isText ? 'none' : '';
+
+            // Right card
+            document.getElementById('textResultsHeader').style.display   = isText ? '' : 'none';
+            document.getElementById('dltResultsHeader').style.display    = isText ? 'none' : '';
+            document.getElementById('textResultsContent').style.display  = isText ? '' : 'none';
+            document.getElementById('dltResultsContent').style.display   = isText ? 'none' : '';
+        }
+
+        // ── DLT file upload ───────────────────────────────────────────────────
+        function onFileChosen(input) {
+            const label = document.getElementById('fileChosen');
+            label.textContent = input.files[0] ? input.files[0].name : '';
+        }
+
+        // Drag-and-drop visual feedback
+        const uploadZone = document.getElementById('uploadZone');
+        ['dragenter','dragover'].forEach(evt =>
+            uploadZone.addEventListener(evt, e => { e.preventDefault(); uploadZone.classList.add('drag-over'); }));
+        ['dragleave','drop'].forEach(evt =>
+            uploadZone.addEventListener(evt, e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); }));
+
+        function clearDlt() {
+            document.getElementById('dltFile').value = '';
+            document.getElementById('dltBlocklist').value = '';
+            document.getElementById('dltSample').value = '0';
+            document.getElementById('fileChosen').textContent = '';
+            document.getElementById('dltResults').style.display = 'none';
+            document.getElementById('dltResults').innerHTML = '';
+            document.getElementById('dltPlaceholder').style.display = '';
+            document.getElementById('dltError').classList.remove('active');
+        }
+
+        // ── DLT scan ──────────────────────────────────────────────────────────
+        async function scanDlt() {
+            const fileInput  = document.getElementById('dltFile');
+            const blocklist  = document.getElementById('dltBlocklist').value.trim();
+            const sampleSize = parseInt(document.getElementById('dltSample').value, 10) || 0;
+            const apiUrl     = document.getElementById('dltApiUrl').value.trim();
+
+            if (!fileInput.files || !fileInput.files[0]) {
+                showDltError('Please select a DLT file to scan.');
+                return;
+            }
+
+            const form = new FormData();
+            form.append('file',        fileInput.files[0]);
+            form.append('blocklist',   blocklist);
+            form.append('sample_size', sampleSize);
+
+            document.getElementById('dltLoading').classList.add('active');
+            document.getElementById('dltResults').style.display = 'none';
+            document.getElementById('dltResults').innerHTML = '';
+            document.getElementById('dltPlaceholder').style.display = 'none';
+            document.getElementById('dltError').classList.remove('active');
+            document.getElementById('dltSubmitBtn').disabled = true;
+
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', body: form, credentials: 'include' });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({ detail: `HTTP ${response.status}` }));
+                    throw new Error(err.detail || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                renderDltReport(data);
+
+            } catch (error) {
+                console.error('DLT scan error:', error);
+                showDltError(`Scan failed: ${error.message}`);
+                document.getElementById('dltPlaceholder').style.display = '';
+            } finally {
+                document.getElementById('dltLoading').classList.remove('active');
+                document.getElementById('dltSubmitBtn').disabled = false;
+            }
+        }
+
+        function showDltError(msg) {
+            const el = document.getElementById('dltError');
+            el.textContent = msg;
+            el.classList.add('active');
+        }
+
+        // ── DLT report renderer ───────────────────────────────────────────────
+        const RISK_ICONS = { SAFE: 'verified', LOW: 'check_circle', MEDIUM: 'warning', HIGH: 'dangerous', UNKNOWN: 'help' };
+
+        function esc(s) {
+            return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        function renderDltReport(d) {
+            const risk  = d.legal.risk_level;
+            const s     = d.summary;
+            const passP = ((s.pass_count / Math.max(s.parsed_entries,1))*100).toFixed(0);
+            const flagP = ((s.pass_flagged / Math.max(s.parsed_entries,1))*100).toFixed(0);
+            const revP  = ((s.review_count / Math.max(s.parsed_entries,1))*100).toFixed(0);
+            const piiP  = ((s.entries_with_pii / Math.max(s.parsed_entries,1))*100).toFixed(1);
+
+            // Risk banner
+            let html = `
+              <div class="risk-banner risk-${risk}">
+                <span class="material-icons risk-icon">${RISK_ICONS[risk] || 'help'}</span>
+                <div>
+                  <div class="risk-level">Risk Level: ${esc(risk)}</div>
+                  <div class="risk-desc">File: ${esc(d.meta.filename)} &nbsp;·&nbsp; Scanned: ${esc(d.meta.scanned_at.slice(0,19).replace('T',' '))} UTC &nbsp;·&nbsp; ${s.parsed_entries.toLocaleString()} entries processed in ${d.meta.elapsed_s}s</div>
+                </div>
+              </div>`;
+
+            // Stats bar
+            html += `<div class="dlt-stats-grid">
+              <div class="dlt-stat"><div class="num">${s.parsed_entries.toLocaleString()}</div><div class="lbl">Scanned</div></div>
+              <div class="dlt-stat"><div class="num pass">${s.pass_count.toLocaleString()}</div><div class="lbl">Pass (${passP}%)</div></div>
+              <div class="dlt-stat"><div class="num flag">${s.pass_flagged.toLocaleString()}</div><div class="lbl">Flagged (${flagP}%)</div></div>
+              <div class="dlt-stat"><div class="num review">${s.review_count.toLocaleString()}</div><div class="lbl">Review (${revP}%)</div></div>
+              <div class="dlt-stat"><div class="num">${s.entries_with_pii.toLocaleString()}</div><div class="lbl">w/ PII (${piiP}%)</div></div>
+              <div class="dlt-stat"><div class="num">${(s.avg_confidence*100).toFixed(0)}%</div><div class="lbl">Avg Confidence</div></div>
+            </div>`;
+
+            // Recommendations
+            html += `<div class="dlt-section-title"><span class="material-icons">gavel</span>Legal Recommendations</div>
+            <ul class="recs-list">${d.legal.recommendations.map(r => `<li>${esc(r)}</li>`).join('')}</ul>`;
+
+            // PII types
+            if (Object.keys(d.pii_type_counts).length) {
+                const rows = Object.entries(d.pii_type_counts).sort((a,b) => b[1]-a[1])
+                    .map(([t,c]) => `<tr><td><span class="token-type">${esc(t)}</span></td><td>${c.toLocaleString()}</td></tr>`).join('');
+                html += `<div class="dlt-section-title"><span class="material-icons">label</span>PII Types Detected</div>
+                <div style="overflow-x:auto"><table class="dlt-table"><thead><tr><th>Type</th><th>Occurrences</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+            }
+
+            // ECU breakdown
+            html += renderBreakdownTable('ECU Breakdown', 'memory', d.ecu_stats);
+            html += renderBreakdownTable('App-ID Breakdown', 'apps', d.app_stats);
+
+            // Flagged entries
+            if (d.flagged_entries && d.flagged_entries.length) {
+                const rows = d.flagged_entries.map(e => `
+                  <tr>
+                    <td>${e.index}</td>
+                    <td>${esc(e.ecu_id)}</td><td>${esc(e.app_id)}</td><td>${esc(e.ctx_id)}</td>
+                    <td><span class="dlt-routing-${e.routing}">${esc(e.routing)}</span></td>
+                    <td>${(e.confidence*100).toFixed(0)}%</td>
+                    <td>${e.pii_types.map(t=>`<span class="token-type">${esc(t)}</span>`).join(' ')}</td>
+                    <td class="payload-cell" title="${esc(e.payload)}">${esc(e.payload)}</td>
+                    <td class="payload-cell" title="${esc(e.cleaned)}" style="color:var(--accent)">${esc(e.cleaned)}</td>
+                  </tr>`).join('');
+                html += `<div class="dlt-section-title"><span class="material-icons">report</span>Flagged Entries (${d.flagged_entries.length})</div>
+                <div style="overflow-x:auto"><table class="dlt-table">
+                  <thead><tr><th>#</th><th>ECU</th><th>App</th><th>Ctx</th><th>Routing</th><th>Conf</th><th>PII Types</th><th>Original Payload</th><th>Cleaned</th></tr></thead>
+                  <tbody>${rows}</tbody>
+                </table></div>`;
+            }
+
+            const resultsEl = document.getElementById('dltResults');
+            resultsEl.innerHTML = html;
+            resultsEl.style.display = '';
+        }
+
+        function renderBreakdownTable(title, icon, stats) {
+            const rows = Object.entries(stats).sort((a,b) => b[1].pii - a[1].pii)
+                .map(([id, s]) => {
+                    const pct = ((s.pii / Math.max(s.total,1))*100).toFixed(0);
+                    return `<tr><td>${esc(id)}</td><td>${s.total.toLocaleString()}</td><td>${s.pii.toLocaleString()}</td><td>${pct}%</td><td>${s.review.toLocaleString()}</td></tr>`;
+                }).join('');
+            return `<div class="dlt-section-title"><span class="material-icons">${icon}</span>${title}</div>
+            <div style="overflow-x:auto"><table class="dlt-table">
+              <thead><tr><th>ID</th><th>Total</th><th>PII</th><th>PII%</th><th>Review</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table></div>`;
+        }
     </script>
 </body>
 </html>

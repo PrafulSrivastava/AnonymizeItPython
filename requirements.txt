@@ -18,6 +18,9 @@ phonenumbers==8.13.27
 # Pattern matching
 pyahocorasick==2.0.0
 
+# File upload support (required for /api/dlt/scan endpoint)
+python-multipart==0.0.18
+
 # Build executable
 pyinstaller==6.11.1
 

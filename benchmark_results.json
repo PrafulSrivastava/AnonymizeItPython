@@ -1,0 +1,1415 @@
+{
+  "timestamp": "2026-03-09T08:58:13.487492",
+  "api_url": "http://localhost:8000",
+  "total_tests": 23,
+  "passed": 22,
+  "failed": 1,
+  "pass_rate": 95.65217391304348,
+  "target_pass_rate": 85.0,
+  "meets_target": true,
+  "results": [
+    {
+      "test_id": "TC01",
+      "group": "structural_pii",
+      "description": "Email with German umlaut name - regex + NER",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 09:14] Sarah Müller: Hi everyone! Can someone help me understand the onboarding flow? My email is sarah.mueller@gmail.com and I've been stuck for 2 days.",
+        "cleaned_text": "[SENDER] Hi everyone! Can someone help me understand the onboarding flow? My email is [EMAIL_01] and I've been stuck for 2 days.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 32,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "EMAIL",
+            "value": "[EMAIL_01]",
+            "original": null,
+            "startIndex": 77,
+            "endIndex": 100,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 12,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.8275,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.7,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.8
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC02",
+      "group": "structural_pii",
+      "description": "UK phone number + Instagram handle",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 11:32] James O'Brien: Just joined the group! My number is +44 7911 123456 if anyone wants to chat directly. Also follow me @jamesobrien_dev on Instagram.",
+        "cleaned_text": "[SENDER] Just joined the group! My number is [PHONE_01] if anyone wants to chat directly. Also follow me [HANDLE_01] on Instagram.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 33,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PHONE",
+            "value": "[PHONE_01]",
+            "original": null,
+            "startIndex": 36,
+            "endIndex": 51,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "HANDLE",
+            "value": "[HANDLE_01]",
+            "original": null,
+            "startIndex": 96,
+            "endIndex": 112,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 13,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.8413461538461539,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.8,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.6923076923076923
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC03",
+      "group": "structural_pii",
+      "description": "German IBAN with spaces",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 14:05] Priya Sharma: Quick question — does the app support IBAN payments? Mine is DE89 3704 0044 0532 0130 00 and I want to test the checkout flow.",
+        "cleaned_text": "[SENDER] Quick question — does the app support [ORG_01] payments? Mine is [IBAN_01]and I want to test the checkout flow.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 32,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "IBAN",
+            "value": "[IBAN_01]",
+            "original": null,
+            "startIndex": 61,
+            "endIndex": 89,
+            "confidence": 0.95,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 12,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "ORG",
+            "value": "[ORG_01]",
+            "original": null,
+            "startIndex": 47,
+            "endIndex": 51,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.7954310344827586,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.7,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.5862068965517241
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC04",
+      "group": "age_dob",
+      "description": "Multiple ages with bucketing",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 10:22] Anna Klein: I'm 34 and honestly the app UX is confusing for someone my age. My mum who is 67 years old also tried it and gave up immediately.",
+        "cleaned_text": "[SENDER] [AGE_30s] and honestly the app UX is confusing for someone my age. My mum who is [AGE_60s] also tried it and gave up immediately.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 30,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "AGE",
+            "value": "[AGE_60s]",
+            "original": null,
+            "startIndex": 78,
+            "endIndex": 90,
+            "confidence": 0.95,
+            "lowConfidence": false
+          },
+          {
+            "type": "AGE",
+            "value": "[AGE_30s]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 6,
+            "confidence": 0.95,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 10,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.8139516129032258,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.8,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 1,
+            "residualTokenDensity": 0.7096774193548387
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 1
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC05",
+      "group": "age_dob",
+      "description": "Birth year in text",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 08:45] Tom Fischer: Born in 1989 so I've seen a lot of apps come and go. This one has potential but the progress tracking feature is broken.",
+        "cleaned_text": "[SENDER] [DOB_01] so I've seen a lot of apps come and go. This one has potential but the progress tracking feature is broken.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 31,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "DOB",
+            "value": "[DOB_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 12,
+            "confidence": 0.9,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 11,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.8200000000000001,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.7,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.75
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC06",
+      "group": "age_dob",
+      "description": "European date format (DD.MM.YYYY)",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 16:18] Lena Bauer: I signed up on my birthday — 14.03.1991 — and the welcome email never arrived. Can someone check?",
+        "cleaned_text": "[SENDER] I signed up on my birthday — [DOB_01] — and the welcome email never arrived. Can someone check?",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 30,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "DOB",
+            "value": "[DOB_01]",
+            "original": null,
+            "startIndex": 29,
+            "endIndex": 39,
+            "confidence": 0.9,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 10,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.823409090909091,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.7,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.7727272727272727
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC07",
+      "group": "ner_edge_cases",
+      "description": "Short names requiring blocklist",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 13:01] Susi: Hey! Is the community feature live yet? My colleague Mo asked me the same thing yesterday and I didn't know what to tell him.",
+        "cleaned_text": "[SENDER] Hey! Is the community feature live yet? My colleague [BLOCKLIST_01] asked me the same thing yesterday and I didn't know what to tell him.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 24,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "BLOCKLIST",
+            "value": "[BLOCKLIST_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 4,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "BLOCKLIST",
+            "value": "[BLOCKLIST_01]",
+            "original": null,
+            "startIndex": 62,
+            "endIndex": 64,
+            "confidence": 1.0,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.7877777777777777,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.6,
+            "nerConfidence": 0.8,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.8518518518518519
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC08",
+      "group": "ner_edge_cases",
+      "description": "Name matching common word (Ali)",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 09:55] Ali: The push notifications stopped working for me after the last update. Ali from the Berlin team had the same issue btw.",
+        "cleaned_text": "[SENDER] The push notifications stopped working for me after the last update. [PERSON_02] from the [LOCATION_01] team had the same issue btw.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 23,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 3,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_02]",
+            "original": null,
+            "startIndex": 78,
+            "endIndex": 81,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "LOCATION",
+            "value": "[LOCATION_01]",
+            "original": null,
+            "startIndex": 91,
+            "endIndex": 97,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.76625,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.6,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 1,
+            "residualTokenDensity": 0.7916666666666666
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 1
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC09",
+      "group": "ner_edge_cases",
+      "description": "Asian name (Mei) in reference",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 17:44] User: Can you tag Mei on this? She was the one who reported the bug last week and I think she has the screenshot.",
+        "cleaned_text": "[SENDER] Can you tag [PERSON_01] on this? She was the one who reported the bug last week and I think she has the screenshot.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 24,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 21,
+            "endIndex": 24,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.8044230769230769,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.6,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.8461538461538461
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC10",
+      "group": "quasi_identifiers",
+      "description": "Role + location + age combination",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 11:10] Maria Gonzalez: As a senior product manager based in Munich, aged 41, I find the dashboard completely unintuitive. This would never pass a basic usability test.",
+        "cleaned_text": "[SENDER] As a senior product manager based in [LOCATION_01], [AGE_40s], I find the dashboard completely unintuitive. This would never pass a basic usability test.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 34,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "AGE",
+            "value": "[AGE_40s]",
+            "original": null,
+            "startIndex": 45,
+            "endIndex": 52,
+            "confidence": 0.95,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 14,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "LOCATION",
+            "value": "[LOCATION_01]",
+            "original": null,
+            "startIndex": 46,
+            "endIndex": 52,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.72,
+          "routing": "review",
+          "signals": {
+            "regexCoverage": 0.7,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 3,
+            "residualTokenDensity": 0.75
+          },
+          "failureReasons": [
+            "Overall confidence score below threshold",
+            "High quasi-identifier density detected"
+          ]
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": true,
+          "quasi_identifier_count": 3
+        },
+        "expected_routing": [
+          "review"
+        ],
+        "actual_routing": "review"
+      }
+    },
+    {
+      "test_id": "TC11",
+      "group": "quasi_identifiers",
+      "description": "Role + location + experience (years)",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 15:33] David: I'm a freelance developer in Frankfurt, been coding for 15 years. The API docs are outdated — the endpoint at /api/v1/users returns a 404.",
+        "cleaned_text": "[SENDER] I'm a freelance developer in [LOCATION_01], been coding for 15 years. The API docs are outdated — the endpoint at /api/v1/users returns a 404.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 25,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 5,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "LOCATION",
+            "value": "[LOCATION_01]",
+            "original": null,
+            "startIndex": 38,
+            "endIndex": 47,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.7052777777777778,
+          "routing": "review",
+          "signals": {
+            "regexCoverage": 0.6,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 2,
+            "residualTokenDensity": 0.8518518518518519
+          },
+          "failureReasons": [
+            "Overall confidence score below threshold",
+            "High quasi-identifier density detected"
+          ]
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": true,
+          "quasi_identifier_count": 2
+        },
+        "expected_routing": [
+          "review",
+          "pass_flagged"
+        ],
+        "actual_routing": "review"
+      }
+    },
+    {
+      "test_id": "TC12",
+      "group": "obfuscated_pii",
+      "description": "Obfuscated email (dot/at format)",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 12:44] Jonas Weber: Reach me at jonas dot weber at protonmail dot com — I don't post my email publicly anymore after the last spam wave.",
+        "cleaned_text": "[SENDER] Reach me at [EMAIL_01] — I don't post my email publicly anymore after the last spam wave.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 31,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "EMAIL",
+            "value": "[EMAIL_01]",
+            "original": null,
+            "startIndex": 12,
+            "endIndex": 49,
+            "confidence": 0.95,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 11,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.7963888888888889,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.7,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.5925925925925926
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC13",
+      "group": "obfuscated_pii",
+      "description": "Old German phone format with parentheses",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 10:08] Claire: My number is 0049 (0) 160 9876 5432 — old German format, not sure if your system recognises it. Happy to jump on a call.",
+        "cleaned_text": "[SENDER] My number is [PHONE_01] — old German format, not sure if your system recognises it. Happy to jump on a call.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 26,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PHONE",
+            "value": "[PHONE_01]",
+            "original": null,
+            "startIndex": 13,
+            "endIndex": 35,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 6,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.8146428571428571,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.7,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.7142857142857143
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC14",
+      "group": "obfuscated_pii",
+      "description": "LinkedIn URL with path",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 14:52] Fatima Al-Hassan: You can find me at linkedin.com/in/fatima-al-hassan-pm or just search my name — I'm the only one with that exact name on there.",
+        "cleaned_text": "[SENDER] You can find me at [URL_01] or just search my name — I'm the only one with that exact name on there.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 36,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "URL",
+            "value": "[URL_01]",
+            "original": null,
+            "startIndex": 19,
+            "endIndex": 54,
+            "confidence": 0.9,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 16,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.8286538461538462,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.7,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.8076923076923077
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC15",
+      "group": "multilingual",
+      "description": "German-English code-switching",
+      "passed": false,
+      "failures": [
+        "Over-redacted: 'iPhone' should be preserved"
+      ],
+      "details": {
+        "original_text": "[26/02/2026, 09:30] Björn Eriksson: Das Feature funktioniert nicht auf meinem iPhone. Björn here btw, Maide hat mir die Gruppe empfohlen. Danke schon mal!",
+        "cleaned_text": "[SENDER] Das Feature funktioniert nicht auf [ORG_01]. [PERSON_02] here btw, [PERSON_03] hat mir die Gruppe empfohlen. Danke schon mal!",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 34,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 14,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_02]",
+            "original": null,
+            "startIndex": 59,
+            "endIndex": 64,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_03]",
+            "original": null,
+            "startIndex": 75,
+            "endIndex": 80,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "ORG",
+            "value": "[ORG_01]",
+            "original": null,
+            "startIndex": 44,
+            "endIndex": 57,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.7753260869565217,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.6,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.6521739130434783
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC16",
+      "group": "multilingual",
+      "description": "Japanese-English code-switching",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 16:05] Yuki Tanaka: すみません、I'm having trouble with the login page. Yuki from the Tokyo cohort — can someone from support help?",
+        "cleaned_text": "[SENDER] すみません、I'm having trouble with the login page. [PERSON_02] from the [LOCATION_01] cohort — can someone from support help?",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 31,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 11,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_02]",
+            "original": null,
+            "startIndex": 55,
+            "endIndex": 59,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "LOCATION",
+            "value": "[LOCATION_01]",
+            "original": null,
+            "startIndex": 69,
+            "endIndex": 74,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.7565909090909091,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.6,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 1,
+            "residualTokenDensity": 0.7272727272727273
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 1
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged",
+          "review"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC17",
+      "group": "sensitive_topics",
+      "description": "Health-related content without explicit PII",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 13:28] User: I need to be honest — I've been dealing with some health issues lately and the app's reminder feature has actually been really helpful for keeping me on track with medication.",
+        "cleaned_text": "[SENDER] I need to be honest — I've been dealing with some health issues lately and the app's reminder feature has actually been really helpful for keeping me on track with medication.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 24,
+            "confidence": 1.0,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.7967647058823528,
+          "routing": "pass",
+          "signals": {
+            "regexCoverage": 0.6,
+            "nerConfidence": 0.8,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.9117647058823529
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass"
+        ],
+        "actual_routing": "pass"
+      }
+    },
+    {
+      "test_id": "TC18",
+      "group": "sensitive_topics",
+      "description": "Personal situation (divorce) without identifiers",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 11:55] Rebecca Hofer: Not sure if this is the right place but I'm going through a divorce and the shared account feature is causing me real problems. Can someone from the team contact me directly?",
+        "cleaned_text": "[SENDER] Not sure if this is the right place but I'm going through a divorce and the shared account feature is causing me real problems. Can someone from the team contact me directly?",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 33,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 13,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.8108333333333333,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.6,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.8888888888888888
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "TC19",
+      "group": "true_negatives",
+      "description": "Technical bug report - zero PII",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 10:00] User: The dark mode on Android is broken. When I switch from light to dark the nav bar stays white. Happens every time on version 2.4.1.",
+        "cleaned_text": "[SENDER] The dark mode on Android is broken. When I switch from light to dark the nav bar stays white. Happens every time on version 2.4.1.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 24,
+            "confidence": 1.0,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.7939285714285713,
+          "routing": "pass",
+          "signals": {
+            "regexCoverage": 0.6,
+            "nerConfidence": 0.8,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.8928571428571429
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass"
+        ],
+        "actual_routing": "pass"
+      }
+    },
+    {
+      "test_id": "TC20",
+      "group": "true_negatives",
+      "description": "Product feedback - zero PII",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[26/02/2026, 15:15] User: Love the new onboarding flow update! The three-step wizard is much clearer than before. One suggestion — add a progress bar so users know how far along they are.",
+        "cleaned_text": "[SENDER] Love the new onboarding flow update! The three-step wizard is much clearer than before. One suggestion — add a progress bar so users know how far along they are.",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 20,
+            "endIndex": 24,
+            "confidence": 1.0,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.7959375,
+          "routing": "pass",
+          "signals": {
+            "regexCoverage": 0.6,
+            "nerConfidence": 0.8,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.90625
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass"
+        ],
+        "actual_routing": "pass"
+      }
+    },
+    {
+      "test_id": "RC01",
+      "group": "real_chat",
+      "description": "Real chat with email and IP address",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[24.01.26, 16:40:31] Critic: prafulsrivastava2021@gmail.com",
+        "cleaned_text": "[SENDER] [EMAIL_01]",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 21,
+            "endIndex": 27,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "EMAIL",
+            "value": "[EMAIL_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 30,
+            "confidence": 1.0,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.7949999999999999,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.7,
+            "nerConfidence": 0.8,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.7
+          },
+          "failureReasons": [
+            "High redaction rate - minimal content preserved"
+          ]
+        },
+        "flags": {
+          "low_signal": true,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "RC02",
+      "group": "real_chat",
+      "description": "LinkedIn URL with name path",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[24.01.26, 17:10:25] Critic: https://www.linkedin.com/in/praful-srivastava-b24586171/",
+        "cleaned_text": "[SENDER] [URL_01][PHONE_01]/",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 21,
+            "endIndex": 27,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PHONE",
+            "value": "[PHONE_01]",
+            "original": null,
+            "startIndex": 47,
+            "endIndex": 55,
+            "confidence": 0.9,
+            "lowConfidence": false
+          },
+          {
+            "type": "URL",
+            "value": "[URL_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 47,
+            "confidence": 1.0,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.825,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.8,
+            "nerConfidence": 0.8,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.7
+          },
+          "failureReasons": [
+            "High redaction rate - minimal content preserved"
+          ]
+        },
+        "flags": {
+          "low_signal": true,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    },
+    {
+      "test_id": "RC03",
+      "group": "real_chat",
+      "description": "Real chat with person names",
+      "passed": true,
+      "failures": [],
+      "details": {
+        "original_text": "[25.01.26, 16:36:13] Maide Altas: Hey Prufel, it was a pleasure meeting you all yesterday!",
+        "cleaned_text": "[SENDER] Hey [PERSON_02], it was a pleasure meeting you all yesterday!",
+        "tokens": [
+          {
+            "type": "SENDER",
+            "value": "[SENDER]",
+            "original": null,
+            "startIndex": 21,
+            "endIndex": 32,
+            "confidence": 1.0,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_01]",
+            "original": null,
+            "startIndex": 0,
+            "endIndex": 11,
+            "confidence": 0.85,
+            "lowConfidence": false
+          },
+          {
+            "type": "PERSON",
+            "value": "[PERSON_02]",
+            "original": null,
+            "startIndex": 13,
+            "endIndex": 19,
+            "confidence": 0.85,
+            "lowConfidence": false
+          }
+        ],
+        "confidence": {
+          "overall": 0.7739285714285714,
+          "routing": "pass_flagged",
+          "signals": {
+            "regexCoverage": 0.6,
+            "nerConfidence": 0.85,
+            "quasiIdentifierCount": 0,
+            "residualTokenDensity": 0.6428571428571429
+          },
+          "failureReasons": []
+        },
+        "flags": {
+          "low_signal": false,
+          "quasi_identifier_risk": false,
+          "quasi_identifier_count": 0
+        },
+        "expected_routing": [
+          "pass",
+          "pass_flagged"
+        ],
+        "actual_routing": "pass_flagged"
+      }
+    }
+  ]
+}

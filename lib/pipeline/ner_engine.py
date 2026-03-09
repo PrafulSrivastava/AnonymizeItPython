@@ -59,7 +59,9 @@ TECH_TERMS = {
     "american", "british", "european", "asian", "african",
     # Common German words that are NOT entities
     "gruppe", "das", "der", "die", "ist", "nicht", "und", "aber",
-    "format", "system", "feature", "update", "version"
+    "format", "system", "feature", "update", "version",
+    # Automotive/technical abbreviations
+    "ota", "dtc", "ecu", "obd"
 }
 
 
@@ -298,7 +300,22 @@ class NEREngine:
             if entity["type"] == "LOCATION" and self.is_tech_term(entity["text"]):
                 continue
 
-            # Filter 5: Apply location granularity rule with smart confidence filtering
+            # Filter 5: Skip PERSON entities that are German phrases, not names
+            if entity["type"] == "PERSON":
+                words = entity["text"].split()
+                german_function_words = {
+                    "bitte", "ruf", "mich", "zurück", "ich", "du", "er",
+                    "sie", "es", "wir", "ihr", "mir", "dir", "uns", "euch",
+                    "bin", "bist", "ist", "sind", "habe", "hat", "machen",
+                    "gehen", "kommen", "sagen", "können", "sollen", "wollen",
+                    "müssen", "nicht", "kein", "keine", "auch", "noch",
+                    "schon", "mal", "doch", "nur", "jetzt", "hier", "dort"
+                }
+                entity_words_lower = {w.lower() for w in words}
+                if len(entity_words_lower & german_function_words) >= 2:
+                    continue
+
+            # Filter 6: Apply location granularity rule with smart confidence filtering
             if entity["type"] == "LOCATION":
                 # Check if it's a country first
                 if self.is_country(entity["text"]):

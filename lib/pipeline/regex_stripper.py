@@ -293,6 +293,7 @@ class RegexStripper:
 
         # Patterns for DOB
         patterns = [
+            r'\b\d{4}-\d{2}-\d{2}\b',             # YYYY-MM-DD (ISO format)
             r'\b\d{1,2}[./]\d{1,2}[./]\d{4}\b',  # DD.MM.YYYY or DD/MM/YYYY
             r'\b\d{1,2}[./]\d{1,2}[./]\d{2}\b',  # DD/MM/YY
             r'\bborn\s+(?:in\s+)?\d{4}\b',       # born 1990, born in 1990
@@ -331,7 +332,9 @@ class RegexStripper:
             r"I'm\s+(\d{1,2})\b",
             r"I am\s+(\d{1,2})\b",
             r"(\d{1,2})\s+years?\s+old",
-            r"aged\s+(\d{1,2})\b"
+            r"aged\s+(\d{1,2})\b",
+            r"(?:she|he|they)\s+turns\s+(\d{1,2})\b",
+            r"\bturns\s+(\d{1,2})\b"
         ]
 
         for pattern in age_patterns:
@@ -365,6 +368,142 @@ class RegexStripper:
 
         return text, tokens
 
+    def extract_gps_coordinates(self, text: str) -> Tuple[str, List[RedactionToken]]:
+        """Extract GPS coordinate pairs to prevent misclassification as PHONE."""
+        tokens = []
+
+        # Match coordinate pairs like "52.520008, 13.404954"
+        gps_pattern = r'-?\d{1,3}\.\d{4,},\s*-?\d{1,3}\.\d{4,}'
+
+        for match in re.finditer(gps_pattern, text):
+            token_value = self.get_next_token("LOCATION")
+            token = RedactionToken(
+                type="LOCATION",
+                value=token_value,
+                original=match.group(0),
+                startIndex=match.start(),
+                endIndex=match.end(),
+                confidence=0.9
+            )
+            tokens.append(token)
+
+        # Sort by start index and replace in reverse order
+        tokens.sort(key=lambda t: t.startIndex, reverse=True)
+        for token in tokens:
+            text = text[:token.startIndex] + token.value + text[token.endIndex:]
+
+        return text, tokens
+
+    def extract_ip_addresses(self, text: str) -> Tuple[str, List[RedactionToken]]:
+        """Extract IPv4 addresses (personal data under GDPR)."""
+        tokens = []
+
+        ip_pattern = r'\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b'
+
+        for match in re.finditer(ip_pattern, text):
+            token_value = self.get_next_token("IP")
+            token = RedactionToken(
+                type="IP",
+                value=token_value,
+                original=match.group(0),
+                startIndex=match.start(),
+                endIndex=match.end(),
+                confidence=0.95
+            )
+            tokens.append(token)
+
+        # Sort by start index and replace in reverse order
+        tokens.sort(key=lambda t: t.startIndex, reverse=True)
+        for token in tokens:
+            text = text[:token.startIndex] + token.value + text[token.endIndex:]
+
+        return text, tokens
+
+    def extract_vin(self, text: str) -> Tuple[str, List[RedactionToken]]:
+        """Extract Vehicle Identification Numbers (VIN) — uniquely identifies a vehicle owner."""
+        tokens = []
+
+        # VIN: exactly 17 alphanumeric chars, excluding I, O, Q
+        vin_pattern = r'\b[A-HJ-NPR-Z0-9]{17}\b'
+
+        for match in re.finditer(vin_pattern, text):
+            vin_text = match.group(0)
+            # VIN must contain both letters and digits
+            if any(c.isalpha() for c in vin_text) and any(c.isdigit() for c in vin_text):
+                token_value = self.get_next_token("VIN")
+                token = RedactionToken(
+                    type="VIN",
+                    value=token_value,
+                    original=vin_text,
+                    startIndex=match.start(),
+                    endIndex=match.end(),
+                    confidence=0.9
+                )
+                tokens.append(token)
+
+        # Sort by start index and replace in reverse order
+        tokens.sort(key=lambda t: t.startIndex, reverse=True)
+        for token in tokens:
+            text = text[:token.startIndex] + token.value + text[token.endIndex:]
+
+        return text, tokens
+
+    def extract_street_addresses(self, text: str) -> Tuple[str, List[RedactionToken]]:
+        """Extract German/European street addresses and postal codes."""
+        tokens = []
+
+        # Common German street name suffixes
+        suffixes = r'(?:stra(?:ß|ss)e|str\.|weg|platz|allee|damm|ring|gasse|ufer|brücke|graben|steig|pfad|chaussee|promenade)'
+
+        # Pattern: StreetName + house number (e.g., "Kurfürstendamm 12")
+        street_pattern = rf'\b[A-ZÄÖÜa-zäöü][A-ZÄÖÜa-zäöü\-]*{suffixes}\s+\d+[a-zA-Z]?\b'
+
+        for match in re.finditer(street_pattern, text, re.IGNORECASE):
+            token_value = self.get_next_token("ADDRESS")
+            token = RedactionToken(
+                type="ADDRESS",
+                value=token_value,
+                original=match.group(0),
+                startIndex=match.start(),
+                endIndex=match.end(),
+                confidence=0.9
+            )
+            tokens.append(token)
+
+        # Apply street replacements first
+        tokens.sort(key=lambda t: t.startIndex, reverse=True)
+        for token in tokens:
+            text = text[:token.startIndex] + token.value + text[token.endIndex:]
+
+        # Pattern: European postal code (5 digits) in address context
+        # Matches 5-digit code after comma+space, before a capitalized word (city name)
+        postal_tokens = []
+        postal_pattern = r',\s+(\d{5})(?=\s+[A-ZÄÖÜa-zäöü])'
+
+        for match in re.finditer(postal_pattern, text):
+            start = match.start(1)
+            end = match.end(1)
+            covered = any(t.startIndex <= start < t.endIndex for t in postal_tokens)
+            if not covered:
+                token_value = self.get_next_token("ADDRESS")
+                token = RedactionToken(
+                    type="ADDRESS",
+                    value=token_value,
+                    original=match.group(1),
+                    startIndex=start,
+                    endIndex=end,
+                    confidence=0.85
+                )
+                postal_tokens.append(token)
+
+        # Apply postal code replacements
+        postal_tokens.sort(key=lambda t: t.startIndex, reverse=True)
+        for token in postal_tokens:
+            text = text[:token.startIndex] + token.value + text[token.endIndex:]
+
+        tokens.extend(postal_tokens)
+        return text, tokens
+
     def process(self, raw_text: str) -> Tuple[str, List[RedactionToken]]:
         """
         Main processing function. Executes all regex-based extractions in order.
@@ -381,27 +520,43 @@ class RegexStripper:
         text, iban_tokens = self.extract_ibans(text)
         all_tokens.extend(iban_tokens)
 
-        # Step 3: Extract phone numbers
+        # Step 3: Extract GPS coordinates (BEFORE phones to prevent PHONE misclassification)
+        text, gps_tokens = self.extract_gps_coordinates(text)
+        all_tokens.extend(gps_tokens)
+
+        # Step 4: Extract IP addresses (BEFORE phones/DOB to prevent false positives)
+        text, ip_tokens = self.extract_ip_addresses(text)
+        all_tokens.extend(ip_tokens)
+
+        # Step 5: Extract phone numbers
         text, phone_tokens = self.extract_phone_numbers(text)
         all_tokens.extend(phone_tokens)
 
-        # Step 4: Extract emails
+        # Step 6: Extract emails
         text, email_tokens = self.extract_emails(text)
         all_tokens.extend(email_tokens)
 
-        # Step 5: Extract URLs
+        # Step 7: Extract URLs
         text, url_tokens = self.extract_urls(text)
         all_tokens.extend(url_tokens)
 
-        # Step 6: Extract handles
+        # Step 8: Extract handles
         text, handle_tokens = self.extract_handles(text)
         all_tokens.extend(handle_tokens)
 
-        # Step 7: Extract DOB
+        # Step 9: Extract VIN numbers
+        text, vin_tokens = self.extract_vin(text)
+        all_tokens.extend(vin_tokens)
+
+        # Step 10: Extract street addresses and postal codes
+        text, address_tokens = self.extract_street_addresses(text)
+        all_tokens.extend(address_tokens)
+
+        # Step 11: Extract DOB
         text, dob_tokens = self.extract_dob(text)
         all_tokens.extend(dob_tokens)
 
-        # Step 8: Extract ages
+        # Step 12: Extract ages
         text, age_tokens = self.extract_ages(text)
         all_tokens.extend(age_tokens)
 

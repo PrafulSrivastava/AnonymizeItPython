@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DLT Anonymization Scan Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #334155;
+    --border: #e2e8f0;
+    --accent: #14b8a6;
+    --accent-light: rgba(20, 184, 166, 0.1);
+    --accent-glow: rgba(20, 184, 166, 0.2);
+    --dark-soft: #1e293b;
+    --safe: #10b981;
+    --low: #f59e0b;
+    --medium: #f97316;
+    --high: #ef4444;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  body {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    background: #0f172a;
+    color: #fff;
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .page-header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+  .page-header .meta { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; }
+  .page-header .meta strong { color: #fff; }
+  .page-header .meta code {
+    background: rgba(255,255,255,0.1);
+    padding: 1px 7px; border-radius: 4px; font-size: 0.78rem;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .header-badge {
+    display: inline-flex; align-items: center;
+    background: rgba(20, 184, 166, 0.18); color: #14b8a6;
+    padding: 4px 12px; border-radius: 100px;
+    font-size: 0.67rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+  }
+
+  /* ── Risk pill ── */
+  .risk-pill {
+    font-size: 0.8rem; font-weight: 700;
+    padding: 6px 18px; border-radius: 100px;
+    text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+  }
+  .risk-safe   { background: var(--safe);   color: #fff; }
+  .risk-low    { background: var(--low);    color: #fff; }
+  .risk-medium { background: var(--medium); color: #fff; }
+  .risk-high   { background: var(--high);   color: #fff; }
+  .risk-unknown { background: #718096;      color: #fff; }
+
+  /* ── Layout ── */
+  .main { max-width: 1320px; margin: 0 auto; padding: 28px 24px; animation: fadeInUp 0.5s ease-out; }
+  .section-label {
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--accent);
+    margin: 28px 0 10px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    padding: 20px 24px;
+    margin-bottom: 0;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .card:hover {
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.1);
+    border-color: rgba(20, 184, 166, 0.25);
+  }
+  .card-title {
+    font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 14px;
+  }
+
+  /* ── Risk card ── */
+  .risk-card { border-left: 5px solid var(--medium); }
+  .risk-card.risk-safe   { border-color: var(--safe); }
+  .risk-card.risk-low    { border-color: var(--low); }
+  .risk-card.risk-medium { border-color: var(--medium); }
+  .risk-card.risk-high   { border-color: var(--high); }
+  .risk-card .risk-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+  }
+  .risk-card .risk-sub { font-size: 0.8rem; color: var(--muted); }
+  .recs { padding-left: 18px; }
+  .recs li { margin: 5px 0; color: #475569; font-size: 0.88rem; }
+
+  /* ── Stats grid ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  .stat-box {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 10px; text-align: center;
+    transition: border-color 0.2s ease;
+  }
+  .stat-box:hover { border-color: var(--accent); }
+  .stat-num {
+    font-size: 1.7rem; font-weight: 700; line-height: 1; color: var(--text);
+  }
+  .stat-num.green { color: var(--safe); }
+  .stat-num.amber { color: var(--low); }
+  .stat-num.red   { color: var(--high); }
+  .stat-lbl {
+    font-size: 0.68rem; color: var(--muted);
+    margin-top: 5px; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+
+  /* ── Two-column ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── Tables ── */
+  table { border-collapse: collapse; width: 100%; font-size: 0.86em; }
+  thead th {
+    background: var(--bg); color: var(--muted);
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left;
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg); }
+
+  /* ── Progress bar ── */
+  .pbar-wrap { display: flex; align-items: center; gap: 7px; }
+  .pbar { flex: 1; height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+  .pbar-fill { height: 100%; border-radius: 4px; }
+  .pbar-fill.green { background: linear-gradient(90deg, #10b981, #34d399); }
+  .pbar-fill.amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .pbar-fill.red   { background: linear-gradient(90deg, #ef4444, #f87171); }
+  .pbar-val { font-size: 0.75rem; color: var(--muted); min-width: 34px; text-align: right; }
+
+  /* ── PII bar chart ── */
+  .pii-chart { display: flex; flex-direction: column; gap: 6px; }
+  .pii-row { display: flex; align-items: center; gap: 10px; }
+  .pii-label {
+    min-width: 80px; font-size: 0.78rem; font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600; color: #334155; text-align: right;
+  }
+  .pii-bar { flex: 1; height: 20px; background: #e2e8f0; border-radius: 5px; overflow: hidden; }
+  .pii-bar-fill {
+    height: 100%; border-radius: 5px;
+    background: linear-gradient(90deg, #14b8a6, #0d9488);
+    display: flex; align-items: center; justify-content: flex-end; padding-right: 7px;
+    min-width: 28px;
+  }
+  .pii-bar-num { font-size: 0.7rem; font-weight: 700; color: #fff; }
+  .pii-total { font-size: 0.75rem; color: var(--muted); min-width: 24px; }
+
+  /* ── Chips ── */
+  .chip {
+    display: inline-block; padding: 2px 8px; border-radius: 100px;
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.04em; white-space: nowrap;
+  }
+  .chip-info    { background: var(--accent-light); color: var(--accent); }
+  .chip-warn    { background: #fffbeb; color: #b7791f; }
+  .chip-warning { background: #fffbeb; color: #b7791f; }
+  .chip-error   { background: #fff5f5; color: #c53030; }
+  .chip-debug   { background: #f0fff4; color: #276749; }
+  .chip-verbose { background: #faf5ff; color: #553c9a; }
+  .chip-pass         { background: #f0fff4; color: #276749; }
+  .chip-pass_flagged { background: #fffbeb; color: #b7791f; }
+  .chip-review       { background: #fff5f5; color: #c53030; }
+  .chip-pii {
+    background: var(--accent-light); color: var(--accent);
+    font-size: 0.63rem; padding: 1px 6px; margin: 1px;
+  }
+
+  /* ── Confidence mini-bar ── */
+  .conf-wrap { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .conf-bar { width: 44px; height: 5px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+  .conf-fill { height: 100%; border-radius: 3px; }
+  .conf-val { font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+
+  /* ── Flagged entries ── */
+  .flagged-controls {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .search-box {
+    flex: 1; min-width: 180px; padding: 7px 12px;
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 0.85rem; outline: none; background: var(--bg);
+    font-family: 'Outfit', sans-serif;
+  }
+  .search-box:focus {
+    border-color: var(--accent); background: #fff;
+    box-shadow: 0 0 0 3px var(--accent-light);
+  }
+  .filter-btn {
+    padding: 6px 13px; border-radius: 8px; border: 1px solid var(--border);
+    background: #fff; cursor: pointer; font-size: 0.75rem; font-weight: 600;
+    color: var(--muted); transition: all 0.15s; font-family: 'Outfit', sans-serif;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .result-count { font-size: 0.75rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
+  .table-wrap { overflow-x: auto; }
+  .payload-cell { max-width: 280px; }
+  .mono-text {
+    font-family: 'IBM Plex Mono', 'Consolas', 'Cascadia Code', 'SF Mono', monospace;
+    font-size: 0.76rem; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; max-width: 260px; cursor: pointer; display: block;
+  }
+  .mono-text.orig { color: #334155; }
+  .mono-text.clean { color: var(--accent); }
+  .mono-text.expanded {
+    white-space: pre-wrap; word-break: break-all;
+    overflow: visible; text-overflow: unset; max-width: none;
+  }
+  .expand-hint { font-size: 0.65rem; color: #a0aec0; margin-top: 1px; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center; color: var(--muted); font-size: 0.72rem;
+    padding: 28px 0 16px; border-top: 1px solid var(--border); margin-top: 32px;
+  }
+  .footer span { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div>
+    <div class="header-badge">DLT Scanner</div>
+    <h1>Anonymization Scan Report</h1>
+    <div class="meta">
+      Scanned at <strong>2026-03-09T08:03:12.310186Z</strong>
+      &nbsp;&bull;&nbsp; Source: <code>system.dlt</code>
+      &nbsp;&bull;&nbsp; Elapsed: <strong>0.7 s</strong>
+    </div>
+  </div>
+  <span class="risk-pill risk-low">LOW</span>
+</header>
+
+<div class="main">
+
+  <!-- Risk Assessment -->
+  <div class="section-label">Risk Assessment</div>
+  <div class="card risk-card risk-low">
+    <div class="risk-header">
+      <span class="risk-pill risk-low">LOW</span>
+      <span class="risk-sub">Legal / Compliance Risk Level</span>
+    </div>
+    <ul class="recs">      <li>A small fraction of log entries contain detectable PII.</li>
+      <li>Review flagged entries before releasing logs externally.</li>
+      <li>Consider adding the detected identifiers to the custom blocklist.</li></ul>
+  </div>
+
+  <!-- Summary -->
+  <div class="section-label">Scan Summary</div>
+  <div class="card">
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-num">43</div>
+        <div class="stat-lbl">Total Entries</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">43</div>
+        <div class="stat-lbl">Scanned</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">0</div>
+        <div class="stat-lbl">Skipped</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num green">13</div>
+        <div class="stat-lbl">Pass</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num amber">30</div>
+        <div class="stat-lbl">Pass (Flagged)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num red">0</div>
+        <div class="stat-lbl">Review Needed</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num red">83.7%</div>
+        <div class="stat-lbl">Entries w/ PII</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">0.815</div>
+        <div class="stat-lbl">Avg Confidence</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PII Distribution -->
+  <div class="section-label">PII Type Distribution</div>
+  <div class="card"><div class="pii-chart">
+<div class='pii-row'><span class='pii-label'>EMAIL</span><div class='pii-bar'><div class='pii-bar-fill' style='width:100%'><span class='pii-bar-num'>17</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>PERSON</span><div class='pii-bar'><div class='pii-bar-fill' style='width:53%'><span class='pii-bar-num'>9</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>PHONE</span><div class='pii-bar'><div class='pii-bar-fill' style='width:35%'><span class='pii-bar-num'>6</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>VIN</span><div class='pii-bar'><div class='pii-bar-fill' style='width:24%'><span class='pii-bar-num'>4</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>LOCATION</span><div class='pii-bar'><div class='pii-bar-fill' style='width:18%'><span class='pii-bar-num'>3</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>ADDRESS</span><div class='pii-bar'><div class='pii-bar-fill' style='width:18%'><span class='pii-bar-num'>3</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>DOB</span><div class='pii-bar'><div class='pii-bar-fill' style='width:18%'><span class='pii-bar-num'>3</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>IP</span><div class='pii-bar'><div class='pii-bar-fill' style='width:12%'><span class='pii-bar-num'>2</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>ORG</span><div class='pii-bar'><div class='pii-bar-fill' style='width:12%'><span class='pii-bar-num'>2</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>URL</span><div class='pii-bar'><div class='pii-bar-fill' style='width:12%'><span class='pii-bar-num'>2</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>HANDLE</span><div class='pii-bar'><div class='pii-bar-fill' style='width:12%'><span class='pii-bar-num'>2</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>IBAN</span><div class='pii-bar'><div class='pii-bar-fill' style='width:6%'><span class='pii-bar-num'>1</span></div></div></div>
+<div class='pii-row'><span class='pii-label'>AGE</span><div class='pii-bar'><div class='pii-bar-fill' style='width:6%'><span class='pii-bar-num'>1</span></div></div></div>
+</div></div>
+
+  <!-- ECU & App Breakdown -->
+  <div class="section-label">Breakdown</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">ECU Breakdown</div>
+      <table><thead><tr><th>ID</th><th>Total</th><th>PII %</th><th>PII</th><th>Review</th></tr></thead><tbody>
+<tr><td><code style='font-size:0.8rem'>ECU1</code></td><td>27</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:81%'></div></div><span class='pbar-val'>81%</span></div></td><td>22</td><td>0</td></tr>
+<tr><td><code style='font-size:0.8rem'>ECU2</code></td><td>9</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:89%'></div></div><span class='pbar-val'>89%</span></div></td><td>8</td><td>0</td></tr>
+<tr><td><code style='font-size:0.8rem'>ECU3</code></td><td>7</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:86%'></div></div><span class='pbar-val'>86%</span></div></td><td>6</td><td>0</td></tr>
+</tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-title">App-ID Breakdown</div>
+      <table><thead><tr><th>ID</th><th>Total</th><th>PII %</th><th>PII</th><th>Review</th></tr></thead><tbody>
+<tr><td><code style='font-size:0.8rem'>AUTH</code></td><td>5</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:100%'></div></div><span class='pbar-val'>100%</span></div></td><td>5</td><td>0</td></tr>
+<tr><td><code style='font-size:0.8rem'>NAVM</code></td><td>6</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:83%'></div></div><span class='pbar-val'>83%</span></div></td><td>5</td><td>0</td></tr>
+<tr><td><code style='font-size:0.8rem'>BTLE</code></td><td>4</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:100%'></div></div><span class='pbar-val'>100%</span></div></td><td>4</td><td>0</td></tr>
+<tr><td><code style='font-size:0.8rem'>OTAM</code></td><td>4</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:100%'></div></div><span class='pbar-val'>100%</span></div></td><td>4</td><td>0</td></tr>
+<tr><td><code style='font-size:0.8rem'>APPL</code></td><td>8</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill green' style='width:38%'></div></div><span class='pbar-val'>38%</span></div></td><td>3</td><td>0</td></tr>
+<tr><td><code style='font-size:0.8rem'>DIAG</code></td><td>4</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:75%'></div></div><span class='pbar-val'>75%</span></div></td><td>3</td><td>0</td></tr>
+<tr><td><code style='font-size:0.8rem'>PMNT</code></td><td>3</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:100%'></div></div><span class='pbar-val'>100%</span></div></td><td>3</td><td>0</td></tr>
+<tr><td><code style='font-size:0.8rem'>EMER</code></td><td>3</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:100%'></div></div><span class='pbar-val'>100%</span></div></td><td>3</td><td>0</td></tr>
+<tr><td><code style='font-size:0.8rem'>APPX</code></td><td>3</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:100%'></div></div><span class='pbar-val'>100%</span></div></td><td>3</td><td>0</td></tr>
+<tr><td><code style='font-size:0.8rem'>NETW</code></td><td>3</td><td><div class='pbar-wrap'><div class='pbar'><div class='pbar-fill red' style='width:100%'></div></div><span class='pbar-val'>100%</span></div></td><td>3</td><td>0</td></tr>
+</tbody></table>
+    </div>
+  </div>
+
+  <!-- Flagged Entries -->
+  <div class="section-label">Flagged Entries</div>
+  <div class="card">
+    <div class="flagged-controls">
+      <input class="search-box" id="entrySearch" type="search"
+             placeholder="Search ECU, App, payload, PII type&#x2026;"
+             oninput="filterTable()">
+      <button class="filter-btn active" id="btn-all"         onclick="setFilter('all')">All (36)</button>
+      <button class="filter-btn"        id="btn-pass"        onclick="setFilter('pass')">Pass</button>
+      <button class="filter-btn"        id="btn-pass_flagged" onclick="setFilter('pass_flagged')">Flagged</button>
+      <button class="filter-btn"        id="btn-review"      onclick="setFilter('review')">Review</button>
+      <span class="result-count" id="resultCount">36 entries</span>
+    </div>
+    <div class="table-wrap">
+      <table id="flaggedTable">
+        <thead>
+          <tr>
+            <th>#</th><th>ECU</th><th>App</th><th>Ctx</th>
+            <th>Level</th><th>Routing</th><th>Confidence</th>
+            <th>PII Types</th><th>Original Payload</th><th>Cleaned</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-routing='pass'><td style='color:var(--muted);font-size:0.78rem'>2</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>APPL</code></td><td style='color:var(--muted);font-size:0.75rem'>BOOT</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass'>pass</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:86%;background:#10b981'></div></div><span class='conf-val'>0.87</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>VIN</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>VIN WBA3A9C50EF478312 detected</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>VIN [VIN_01] detected</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>3</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>APPL</code></td><td style='color:var(--muted);font-size:0.75rem'>BOOT</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:78%;background:#f59e0b'></div></div><span class='conf-val'>0.78</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span><span class='chip chip-pii'>PERSON</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Owner registered: Max Mustermann, max.mustermann@bmw-dealer.de</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Owner registered: [PERSON_01], [EMAIL_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>4</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>APPL</code></td><td style='color:var(--muted);font-size:0.75rem'>BOOT</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:74%;background:#f59e0b'></div></div><span class='conf-val'>0.74</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>PHONE</span><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Dealer contact: service@autohaus-berlin.de, +49 30 88762100</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Dealer contact: [EMAIL_01], [PHONE_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>5</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>AUTH</code></td><td style='color:var(--muted);font-size:0.75rem'>SESS</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:78%;background:#f59e0b'></div></div><span class='conf-val'>0.78</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>IP</span><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Login attempt: user=alice.weber@gmail.com from IP 10.0.2.15</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Login attempt: user=[EMAIL_01] from IP [IP_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>6</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>AUTH</code></td><td style='color:var(--muted);font-size:0.75rem'>SESS</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:76%;background:#f59e0b'></div></div><span class='conf-val'>0.76</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Authentication successful for alice.weber@gmail.com</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Authentication successful for [EMAIL_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>7</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>AUTH</code></td><td style='color:var(--muted);font-size:0.75rem'>SESS</td><td><span class='chip chip-warn'>warn</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:78%;background:#f59e0b'></div></div><span class='conf-val'>0.78</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Failed login attempt #2 for bob.schmidt@outlook.de</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Failed login attempt #2 for [EMAIL_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>8</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>AUTH</code></td><td style='color:var(--muted);font-size:0.75rem'>SESS</td><td><span class='chip chip-error'>error</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:78%;background:#f59e0b'></div></div><span class='conf-val'>0.79</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Account locked after 3 failed attempts: frank.huber@yahoo.de</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Account locked after 3 failed attempts: [EMAIL_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>9</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>AUTH</code></td><td style='color:var(--muted);font-size:0.75rem'>SESS</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:79%;background:#f59e0b'></div></div><span class='conf-val'>0.79</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Session token issued: user=alice.weber@gmail.com token_id=sess_4f9a1b2c</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Session token issued: user=[EMAIL_01] token_id=sess_4f9a1b2c</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>10</td><td><code style='font-size:0.8rem'>ECU2</code></td><td><code style='font-size:0.8rem'>NAVM</code></td><td style='color:var(--muted);font-size:0.75rem'>GPS</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:82%;background:#f59e0b'></div></div><span class='conf-val'>0.83</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>LOCATION</span><span class='chip chip-pii'>ADDRESS</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Home address set: Kurfürstendamm 12, 10719 Berlin, Germany</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Home address set: [ADDRESS_01], [ADDRESS_02] [LOCATION_01], Germany</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>11</td><td><code style='font-size:0.8rem'>ECU2</code></td><td><code style='font-size:0.8rem'>NAVM</code></td><td style='color:var(--muted);font-size:0.75rem'>GPS</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:82%;background:#f59e0b'></div></div><span class='conf-val'>0.83</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>LOCATION</span><span class='chip chip-pii'>PHONE</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>GPS fix acquired: lat=52.520008 lon=13.404954 (Berlin city centre)</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>GPS fix acquired: lat=[PHONE_01] lon=[PHONE_02] ([LOCATION_01] city centre)</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass'><td style='color:var(--muted);font-size:0.78rem'>12</td><td><code style='font-size:0.8rem'>ECU2</code></td><td><code style='font-size:0.8rem'>NAVM</code></td><td style='color:var(--muted);font-size:0.75rem'>GPS</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass'>pass</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:90%;background:#10b981'></div></div><span class='conf-val'>0.91</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>LOCATION</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Route planned: start=52.520008,13.404954 end=48.137154,11.576124</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Route planned: start=[LOCATION_01] end=[LOCATION_02]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>13</td><td><code style='font-size:0.8rem'>ECU2</code></td><td><code style='font-size:0.8rem'>NAVM</code></td><td style='color:var(--muted);font-size:0.75rem'>GPS</td><td><span class='chip chip-debug'>debug</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:72%;background:#f59e0b'></div></div><span class='conf-val'>0.73</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>PHONE</span><span class='chip chip-pii'>ADDRESS</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Waypoint saved: Hauptstrasse 45, 80336 München contact=+49 89 12345678</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Waypoint saved: [ADDRESS_01], [ADDRESS_02] München contact=[PHONE_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass'><td style='color:var(--muted);font-size:0.78rem'>14</td><td><code style='font-size:0.8rem'>ECU2</code></td><td><code style='font-size:0.8rem'>NAVM</code></td><td style='color:var(--muted);font-size:0.75rem'>GPS</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass'>pass</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:85%;background:#10b981'></div></div><span class='conf-val'>0.85</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>ADDRESS</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Work address saved: Friedrichstrasse 100, 10117 Berlin</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Work address saved: [ADDRESS_01], [ADDRESS_02] Berlin</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass'><td style='color:var(--muted);font-size:0.78rem'>15</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>BTLE</code></td><td style='color:var(--muted);font-size:0.75rem'>PAIR</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass'>pass</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:93%;background:#10b981'></div></div><span class='conf-val'>0.93</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>PERSON</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Bluetooth device paired: name=Alice&#x27;s iPhone 15 address=A4:B8:C2:D3:E4:F5</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Bluetooth device paired: name=[PERSON_01]&#x27;s iPhone 15 address=A4:B8:C2:D3:E4:F5</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>16</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>BTLE</code></td><td style='color:var(--muted);font-size:0.75rem'>PAIR</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:76%;background:#f59e0b'></div></div><span class='conf-val'>0.77</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>PHONE</span><span class='chip chip-pii'>PERSON</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Phone number synced from contacts: +44 7911 654321 (James O&#x27;Brien)</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Phone number synced from contacts: [PHONE_01] ([PERSON_01])</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>17</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>BTLE</code></td><td style='color:var(--muted);font-size:0.75rem'>PAIR</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:76%;background:#f59e0b'></div></div><span class='conf-val'>0.77</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>ORG</span><span class='chip chip-pii'>PHONE</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>WhatsApp notification from +49 170 9876543: Bitte ruf mich zurück</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>[ORG_01] notification from [PHONE_01]: Bitte ruf mich zurück</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>18</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>BTLE</code></td><td style='color:var(--muted);font-size:0.75rem'>PAIR</td><td><span class='chip chip-debug'>debug</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:76%;background:#f59e0b'></div></div><span class='conf-val'>0.77</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>DOB</span><span class='chip chip-pii'>PERSON</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Calendar sync: event=&#x27;Doctor appointment Praxis Dr. Meier&#x27; at 2026-03-15 09:00</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Calendar sync: event=&#x27;Doctor appointment Praxis Dr. [PERSON_01]&#x27; at [DOB_01] 09:00</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>19</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>OTAM</code></td><td style='color:var(--muted);font-size:0.75rem'>HTTP</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:79%;background:#f59e0b'></div></div><span class='conf-val'>0.79</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>OTA update requested by user: alice.weber@gmail.com via app</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>OTA update requested by user: [EMAIL_01] via app</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>20</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>OTAM</code></td><td style='color:var(--muted);font-size:0.75rem'>HTTP</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:76%;background:#f59e0b'></div></div><span class='conf-val'>0.76</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>URL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Download URL: https://updates.vehicle-ota.example.com/fw/v2.15.0.bin?token=eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiYWxpY2Uud2ViZXJAZ21haWwuY29tIn0.abc123</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Download URL: [URL_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>21</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>OTAM</code></td><td style='color:var(--muted);font-size:0.75rem'>HTTP</td><td><span class='chip chip-debug'>debug</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:81%;background:#f59e0b'></div></div><span class='conf-val'>0.81</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Update server response: user_id=usr_99182 email=alice.weber@gmail.com plan=premium</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Update server response: user_id=usr_99182 email=[EMAIL_01] plan=premium</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>22</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>OTAM</code></td><td style='color:var(--muted);font-size:0.75rem'>HTTP</td><td><span class='chip chip-warn'>warn</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:77%;background:#f59e0b'></div></div><span class='conf-val'>0.77</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>IP</span><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Retry 1/3 connecting to 203.0.113.42:443 for user alice.weber@gmail.com</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Retry 1/3 connecting to [IP_01]:443 for user [EMAIL_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass'><td style='color:var(--muted);font-size:0.78rem'>23</td><td><code style='font-size:0.8rem'>ECU3</code></td><td><code style='font-size:0.8rem'>DIAG</code></td><td style='color:var(--muted);font-size:0.75rem'>DTC</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass'>pass</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:89%;background:#10b981'></div></div><span class='conf-val'>0.90</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>VIN</span><span class='chip chip-pii'>PERSON</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>DTC P0300 logged for vehicle WBA3A9C50EF478312 owner=Max Mustermann</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>DTC P0300 logged for vehicle [VIN_01] owner=[PERSON_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>24</td><td><code style='font-size:0.8rem'>ECU3</code></td><td><code style='font-size:0.8rem'>DIAG</code></td><td style='color:var(--muted);font-size:0.75rem'>DTC</td><td><span class='chip chip-warn'>warn</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:77%;background:#f59e0b'></div></div><span class='conf-val'>0.78</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>ORG</span><span class='chip chip-pii'>VIN</span><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Emission fault detected: reporting to regulatory@kba.de for VIN WBA3A9C50EF478312</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Emission fault detected: reporting to [EMAIL_01] for [ORG_01] [VIN_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>25</td><td><code style='font-size:0.8rem'>ECU3</code></td><td><code style='font-size:0.8rem'>DIAG</code></td><td style='color:var(--muted);font-size:0.75rem'>DTC</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:81%;background:#f59e0b'></div></div><span class='conf-val'>0.81</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Remote diagnostic session opened by tech ID T-00412 (hans.gruber@workshop.de)</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Remote diagnostic session opened by tech ID T-00412 ([EMAIL_01])</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>26</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>PMNT</code></td><td style='color:var(--muted);font-size:0.75rem'>SUBS</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:73%;background:#f59e0b'></div></div><span class='conf-val'>0.73</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>IBAN</span><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Subscription renewal: alice.weber@gmail.com IBAN DE89 3704 0044 0532 0130 00</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Subscription renewal: [EMAIL_01] IBAN [IBAN_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>27</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>PMNT</code></td><td style='color:var(--muted);font-size:0.75rem'>SUBS</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:79%;background:#f59e0b'></div></div><span class='conf-val'>0.79</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Payment confirmed: €49.99 charged to card ending 4242 for alice.weber@gmail.com</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Payment confirmed: €49.99 charged to card ending 4242 for [EMAIL_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>28</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>PMNT</code></td><td style='color:var(--muted);font-size:0.75rem'>SUBS</td><td><span class='chip chip-warn'>warn</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:79%;background:#f59e0b'></div></div><span class='conf-val'>0.79</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Payment failed: card expired for frank.huber@yahoo.de, retry scheduled</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Payment failed: card expired for [EMAIL_01], retry scheduled</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass'><td style='color:var(--muted);font-size:0.78rem'>29</td><td><code style='font-size:0.8rem'>ECU3</code></td><td><code style='font-size:0.8rem'>EMER</code></td><td style='color:var(--muted);font-size:0.75rem'>ECAL</td><td><span class='chip chip-error'>error</span></td><td><span class='chip chip-pass'>pass</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:88%;background:#10b981'></div></div><span class='conf-val'>0.89</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>VIN</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>eCall triggered: vehicle WBA3A9C50EF478312 at lat=52.4795,lon=13.3671</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>eCall triggered: vehicle [VIN_01] at lat=52.4795,lon=13.3671</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>30</td><td><code style='font-size:0.8rem'>ECU3</code></td><td><code style='font-size:0.8rem'>EMER</code></td><td style='color:var(--muted);font-size:0.75rem'>ECAL</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:73%;background:#f59e0b'></div></div><span class='conf-val'>0.73</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>PHONE</span><span class='chip chip-pii'>PERSON</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Emergency contact notified: Lisa Mustermann +49 160 1112233</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Emergency contact notified: [PERSON_01] [PHONE_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>31</td><td><code style='font-size:0.8rem'>ECU3</code></td><td><code style='font-size:0.8rem'>EMER</code></td><td style='color:var(--muted);font-size:0.75rem'>ECAL</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:76%;background:#f59e0b'></div></div><span class='conf-val'>0.76</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Crash data transmitted to rescue@rettungsdienst-berlin.de</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Crash data transmitted to [EMAIL_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>32</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>APPX</code></td><td style='color:var(--muted);font-size:0.75rem'>NOTF</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:79%;background:#f59e0b'></div></div><span class='conf-val'>0.79</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>HANDLE</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Twitter/X notification: @aliceweber123 mentioned you in a post</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Twitter/X notification: [HANDLE_01] mentioned you in a post</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>33</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>APPX</code></td><td style='color:var(--muted);font-size:0.75rem'>NOTF</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:76%;background:#f59e0b'></div></div><span class='conf-val'>0.76</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>HANDLE</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Instagram message from @maxmustermann_official received</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Instagram message from [HANDLE_01] received</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>34</td><td><code style='font-size:0.8rem'>ECU1</code></td><td><code style='font-size:0.8rem'>APPX</code></td><td style='color:var(--muted);font-size:0.75rem'>NOTF</td><td><span class='chip chip-debug'>debug</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:75%;background:#f59e0b'></div></div><span class='conf-val'>0.76</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>DOB</span><span class='chip chip-pii'>PERSON</span><span class='chip chip-pii'>AGE</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Calendar reminder: Birthday of Lena Müller on 1989-04-17 (she turns 37)</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Calendar reminder: Birthday of [PERSON_01] on [DOB_01] ([AGE_30s])</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>35</td><td><code style='font-size:0.8rem'>ECU2</code></td><td><code style='font-size:0.8rem'>NETW</code></td><td style='color:var(--muted);font-size:0.75rem'>TELE</td><td><span class='chip chip-info'>info</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:76%;background:#f59e0b'></div></div><span class='conf-val'>0.76</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>URL</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Telemetry endpoint: https://telemetry.oem-cloud.example.com/v3/ingest</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Telemetry endpoint: [URL_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>36</td><td><code style='font-size:0.8rem'>ECU2</code></td><td><code style='font-size:0.8rem'>NETW</code></td><td style='color:var(--muted);font-size:0.75rem'>TELE</td><td><span class='chip chip-debug'>debug</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:81%;background:#f59e0b'></div></div><span class='conf-val'>0.81</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>DOB</span><span class='chip chip-pii'>PERSON</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Sending driver profile id=DRV-7742 name=Max Mustermann dob=1985-06-23 to cloud</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Sending driver profile id=DRV-7742 name=[PERSON_01] dob=[DOB_01] to cloud</span><div class='expand-hint'>click to expand</div></td></tr>
+          <tr data-routing='pass_flagged'><td style='color:var(--muted);font-size:0.78rem'>37</td><td><code style='font-size:0.8rem'>ECU2</code></td><td><code style='font-size:0.8rem'>NETW</code></td><td style='color:var(--muted);font-size:0.75rem'>TELE</td><td><span class='chip chip-debug'>debug</span></td><td><span class='chip chip-pass_flagged'>pass_flagged</span></td><td><div class='conf-wrap'><div class='conf-bar'><div class='conf-fill' style='width:80%;background:#f59e0b'></div></div><span class='conf-val'>0.81</span></div></td><td style='white-space:nowrap'><span class='chip chip-pii'>EMAIL</span><span class='chip chip-pii'>PERSON</span></td><td class='payload-cell'><span class='mono-text orig' onclick='toggleMono(this)'>Driver score uploaded: driver=Max Mustermann score=87 insurance=allianz@kfz.de</span><div class='expand-hint'>click to expand</div></td><td class='payload-cell'><span class='mono-text clean' onclick='toggleMono(this)'>Driver score uploaded: driver=[PERSON_01] score=87 insurance=[EMAIL_01]</span><div class='expand-hint'>click to expand</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /.main -->
+
+<div class="footer">Generated by <span>AnonymizeIt</span> &bull; DLT Anonymization Scanner</div>
+
+<script>
+  var activeFilter = 'all';
+
+  function setFilter(f) {
+    activeFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    var btn = document.getElementById('btn-' + f);
+    if (btn) btn.classList.add('active');
+    filterTable();
+  }
+
+  function filterTable() {
+    var query = document.getElementById('entrySearch').value.toLowerCase();
+    var rows = document.querySelectorAll('#flaggedTable tbody tr');
+    var visible = 0;
+    rows.forEach(function(row) {
+      var routing = row.getAttribute('data-routing') || '';
+      var matchFilter = (activeFilter === 'all' || routing === activeFilter);
+      var matchSearch = !query || row.textContent.toLowerCase().indexOf(query) !== -1;
+      row.style.display = (matchFilter && matchSearch) ? '' : 'none';
+      if (matchFilter && matchSearch) visible++;
+    });
+    document.getElementById('resultCount').textContent = visible + ' entries';
+  }
+
+  function toggleMono(el) {
+    el.classList.toggle('expanded');
+    var hint = el.nextElementSibling;
+    if (hint && hint.classList.contains('expand-hint')) {
+      hint.textContent = el.classList.contains('expanded') ? 'click to collapse' : 'click to expand';
+    }
+  }
+</script>
+</body>
+</html>

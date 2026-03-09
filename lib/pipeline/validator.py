@@ -48,6 +48,25 @@ class Validator:
             if not re.search(r'\[DOB_\d+\]', cleaned_text):
                 return False, "Date pattern detected in cleaned text"
 
+        # ISO date pattern (YYYY-MM-DD)
+        iso_date_pattern = r'\b\d{4}-\d{2}-\d{2}\b'
+        if re.search(iso_date_pattern, cleaned_text):
+            if not re.search(r'\[DOB_\d+\]', cleaned_text):
+                return False, "ISO date pattern detected in cleaned text"
+
+        # IPv4 address pattern
+        ip_pattern = r'\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b'
+        if re.search(ip_pattern, cleaned_text):
+            return False, "IP address detected in cleaned text"
+
+        # VIN pattern (17 alphanumeric chars excluding I, O, Q)
+        vin_pattern = r'\b[A-HJ-NPR-Z0-9]{17}\b'
+        vin_match = re.search(vin_pattern, cleaned_text)
+        if vin_match:
+            vin_text = vin_match.group(0)
+            if any(c.isalpha() for c in vin_text) and any(c.isdigit() for c in vin_text):
+                return False, "VIN pattern detected in cleaned text"
+
         return True, ""
 
     def check_token_integrity(self, cleaned_text: str) -> tuple[bool, str]:

@@ -10,7 +10,8 @@ from pydantic import BaseModel, Field, field_serializer
 # Token types
 TokenType = Literal[
     "PHONE", "EMAIL", "URL", "HANDLE", "AGE", "DOB",
-    "PERSON", "ORG", "LOCATION", "IBAN", "BLOCKLIST", "SENDER"
+    "PERSON", "ORG", "LOCATION", "IBAN", "BLOCKLIST", "SENDER",
+    "IP", "VIN", "ADDRESS"
 ]
 
 # Routing decisions
