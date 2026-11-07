@@ -16,10 +16,12 @@ TokenType = Literal[
 # Routing decisions
 RoutingDecision = Literal["pass", "pass_flagged", "review"]
 
+MAX_WORKFLOW_CHARS = 8000
+
 
 class PipelineInput(BaseModel):
     """Request body for anonymization endpoint."""
-    rawText: str = Field(..., max_length=500, description="Raw WhatsApp message text")
+    rawText: str = Field(..., max_length=MAX_WORKFLOW_CHARS, description="Raw text to anonymize")
     blocklist: str = Field(default="", description="Comma-separated list of terms to redact")
     sessionId: str = Field(..., description="Session identifier for tracking")
 
