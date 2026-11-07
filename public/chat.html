@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <!--
 THESIS: A chat where privacy is visible on demand. Every exchange can flip between what you see and what the AI saw; it refuses the dashboard-of-scores arrangement of the tester page.
-OWN-WORLD: Wispr Flow's paper ground (#FFFFEB), EB Garamond display with an italic turn, Figtree UI, 1px ink outlines, lavender primary, forest placeholder tokens.
+OWN-WORLD: Security envelope: cool white stationery (#F5F7FB), ink-blue type and buttons (#14224A), the blue crosshatch tint for anything the AI sees, typewritten Courier Prime placeholders, marigold highlighter (#FBD98A) for restored details. Schibsted Grotesk throughout.
 STORY: The visitor asks something containing personal details, gets a natural answer with their real details back, and can check that the AI only saw placeholders.
-FIRST VIEWPORT: Announcement bar; floating nav pill (wordmark, Chat/Anonymizer switch); centered serif headline "Ask anything, privately."; one line of explanation; three prompt suggestions; a tilted ink ribbon showing a placeholder sentence; composer pinned to the bottom with the lavender Send button.
-FORM: Conversation column (rank 1 of: conversation column, split before/after, inspector drawer). Pinned brief; no seed run.
+FIRST VIEWPORT: Ink announcement bar; nav bar (wordmark, Chat/Anonymizer switch); left-aligned bold headline "Ask anything, privately."; one line of explanation; three prompt suggestions; an envelope-window strip showing a placeholder sentence; composer pinned to the bottom with the ink Send button.
+FORM: Conversation column (rank 1 of: conversation column, split before/after, inspector drawer). Brief-pinned direction; no seed run.
 -->
 <html lang="en">
 <head>
@@ -13,22 +13,24 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
     <title>Private Chat · Text Anonymization Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,700;1,500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --paper: #FFFFEB;
-            --paper-deep: #F6F5DC;
-            --line: #E4E4D0;
-            --ink: #1A1A1A;
-            --ink-soft: #55554A;
-            --lavender: #F0D7FF;
-            --lavender-deep: #E4C2FA;
-            --forest: #1F4A3D;
-            --forest-tint: #E2EADB;
-            --coral: #C2410C;
-            --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            --paper: #F5F7FB;
+            --paper-deep: #EAEEF6;
+            --line: #D5DCEA;
+            --tint: #E2E8F4;
+            --ink: #14224A;
+            --ink-soft: #4A5677;
+            --marigold: #FBD98A;
+            --marigold-deep: #E9A923;
+            --alert: #B42318;
+            --label: "Courier Prime", ui-monospace, Menlo, monospace;
             --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
             --column: 46rem;
+            --security:
+                repeating-linear-gradient(45deg, rgba(20, 34, 74, 0.07) 0 1px, transparent 1px 6px),
+                repeating-linear-gradient(-45deg, rgba(20, 34, 74, 0.07) 0 1px, transparent 1px 6px);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,7 +38,7 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
         html { -webkit-text-size-adjust: 100%; }
 
         body {
-            font-family: "Figtree", system-ui, sans-serif;
+            font-family: "Schibsted Grotesk", system-ui, sans-serif;
             font-size: 1rem;
             line-height: 1.55;
             color: var(--ink);
@@ -62,7 +64,10 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
 
         /* Announcement bar */
         .announce {
-            background: var(--forest);
+            background-color: var(--ink);
+            background-image:
+                repeating-linear-gradient(45deg, rgba(245, 247, 251, 0.06) 0 1px, transparent 1px 6px),
+                repeating-linear-gradient(-45deg, rgba(245, 247, 251, 0.06) 0 1px, transparent 1px 6px);
             color: var(--paper);
             text-align: center;
             font-size: 0.875rem;
@@ -70,13 +75,13 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             padding: 0.6rem 1rem;
         }
 
-        /* Nav pill */
+        /* Nav */
         .nav-wrap {
             position: sticky;
             top: 0;
             z-index: 10;
-            padding: 0.9rem 1rem 0.5rem;
-            background: linear-gradient(var(--paper) 70%, rgba(255, 255, 235, 0));
+            background: var(--paper);
+            border-bottom: 1px solid var(--line);
         }
 
         .nav {
@@ -84,19 +89,17 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             margin: 0 auto;
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 0.4rem 0.4rem 0.4rem 1rem;
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            background: var(--paper);
+            gap: 1.25rem;
+            padding: 0.65rem 1rem;
         }
 
         .wordmark {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
+            gap: 0.55rem;
+            font-weight: 700;
             font-size: 1rem;
+            letter-spacing: -0.01em;
             text-decoration: none;
             white-space: nowrap;
         }
@@ -107,7 +110,7 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             display: inline-flex;
             padding: 3px;
             gap: 2px;
-            border-radius: 999px;
+            border-radius: 8px;
             background: var(--line);
         }
 
@@ -120,8 +123,8 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             text-decoration: none;
             background: transparent;
             border: 0;
-            border-radius: 999px;
-            padding: 0.3rem 0.85rem;
+            border-radius: 6px;
+            padding: 0.28rem 0.8rem;
             cursor: pointer;
             transition: background-color 0.25s var(--ease-out), color 0.25s var(--ease-out);
         }
@@ -133,14 +136,13 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
         .segmented [aria-pressed="true"] {
             background: var(--paper);
             color: var(--ink);
-            box-shadow: 0 1px 2px rgba(26, 26, 26, 0.08);
         }
 
         .nav-model {
             margin-left: auto;
+            font-family: var(--label);
             font-size: 0.8125rem;
             color: var(--ink-soft);
-            padding-right: 0.6rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -156,34 +158,31 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
         }
 
         /* Empty state */
-        .intro {
-            text-align: center;
-            padding: 4.5rem 0 1.5rem;
-        }
+        .intro { padding: 4rem 0 1.5rem; }
 
         .kicker {
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
+            font-family: var(--label);
+            font-size: 0.875rem;
             color: var(--ink-soft);
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
         }
 
         .intro h1 {
-            font-family: "EB Garamond", Georgia, serif;
-            font-weight: 400;
-            font-size: clamp(3rem, 9vw, 5.25rem);
+            font-weight: 700;
+            font-size: clamp(2.75rem, 8vw, 4.75rem);
             line-height: 0.98;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.035em;
             text-wrap: balance;
         }
 
-        .intro h1 em { font-style: italic; }
+        .intro h1 em {
+            font-style: italic;
+            font-weight: 500;
+        }
 
         .intro p.lede {
-            max-width: 32rem;
-            margin: 1.5rem auto 0;
+            max-width: 34rem;
+            margin-top: 1.25rem;
             font-size: 1.125rem;
             color: var(--ink-soft);
             text-wrap: pretty;
@@ -191,9 +190,7 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
 
         .suggestions {
             list-style: none;
-            margin: 2.75rem auto 0;
-            max-width: 34rem;
-            text-align: left;
+            margin-top: 2.5rem;
             border-top: 1px solid var(--line);
         }
 
@@ -206,13 +203,14 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             justify-content: space-between;
             gap: 1rem;
             text-align: left;
-            font-family: "EB Garamond", Georgia, serif;
-            font-size: 1.3rem;
-            line-height: 1.3;
+            font: inherit;
+            font-size: 1.125rem;
+            font-weight: 500;
+            line-height: 1.35;
             color: var(--ink);
             background: none;
             border: 0;
-            padding: 0.9rem 0.25rem;
+            padding: 0.85rem 0.1rem;
             cursor: pointer;
         }
 
@@ -221,34 +219,32 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
         .suggestions button:hover .label { transform: translateX(0.5rem); }
 
         .suggestions .go {
-            font-family: "Figtree", sans-serif;
             font-size: 0.875rem;
+            font-weight: 400;
             color: var(--ink-soft);
             flex: none;
         }
 
-        /* Ribbon: what the model sees */
-        .ribbon {
-            margin: 3.5rem calc(50% - 50vw) 0;
-            transform: rotate(-2deg);
-            background: var(--ink);
-            color: var(--paper);
-            padding: 0.75rem 1.5rem;
-            font-size: 1.05rem;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        /* Envelope window: what the model sees */
+        .envelope {
+            margin-top: 3rem;
+            padding: 1.25rem;
+            border-radius: 12px;
+            background-color: var(--tint);
+            background-image: var(--security);
         }
 
-        .ribbon .ph {
-            background: rgba(255, 255, 235, 0.14);
-            color: var(--paper);
+        .envelope-window {
+            background: var(--paper);
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            padding: 0.9rem 1.1rem;
+            font-size: 1rem;
+            line-height: 1.7;
         }
 
-        .ribbon-caption {
-            margin-top: 1.25rem;
-            text-align: center;
+        .envelope-caption {
+            margin-top: 0.85rem;
             font-size: 0.875rem;
             color: var(--ink-soft);
         }
@@ -258,7 +254,7 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             display: flex;
             flex-direction: column;
             gap: 2.75rem;
-            padding-top: 1.5rem;
+            padding-top: 1.75rem;
         }
 
         .exchange { display: flex; flex-direction: column; gap: 1.25rem; }
@@ -281,19 +277,9 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             background: var(--ink);
             color: var(--paper);
             padding: 0.85rem 1.1rem;
-            border-radius: 16px 16px 4px 16px;
+            border-radius: 14px 14px 4px 14px;
             white-space: pre-wrap;
             overflow-wrap: anywhere;
-        }
-
-        .msg-user .real {
-            background: rgba(240, 215, 255, 0.28);
-            color: var(--paper);
-        }
-
-        .msg-user .ph {
-            background: rgba(226, 234, 219, 0.18);
-            color: var(--paper);
         }
 
         .msg-ai {
@@ -302,41 +288,64 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             max-width: 68ch;
             white-space: pre-wrap;
             overflow-wrap: anywhere;
+            padding: 0.6rem 0.75rem;
+            margin: -0.6rem -0.75rem;
+            border-radius: 8px;
         }
 
         .view-body { transition: opacity 0.28s var(--ease-out), filter 0.28s var(--ease-out); }
 
         .view-body.swapping { opacity: 0; filter: blur(4px); }
 
-        .exchange[data-view="ai"] .msg-user,
-        .exchange[data-view="ai"] .msg-ai {
-            outline: 1px dashed var(--forest);
-            outline-offset: 4px;
-            border-radius: 4px;
+        /* "The AI" view: everything behind the security tint */
+        .exchange[data-view="ai"] .msg-user {
+            background-color: var(--tint);
+            background-image: var(--security);
+            color: var(--ink);
+            outline: 1px solid var(--line);
+            outline-offset: -1px;
         }
 
-        .exchange[data-view="ai"] .msg-user { border-radius: 16px 16px 4px 16px; }
+        .exchange[data-view="ai"] .msg-ai {
+            background-color: var(--tint);
+            background-image: var(--security);
+        }
 
         .real {
-            background: var(--lavender);
-            border-radius: 4px;
+            background: var(--marigold);
+            color: var(--ink);
+            border-radius: 3px;
             padding: 0 0.2em;
             box-decoration-break: clone;
             -webkit-box-decoration-break: clone;
         }
 
         .ph {
-            font-family: var(--mono);
-            font-size: 0.86em;
-            background: var(--forest-tint);
-            color: var(--forest);
-            border-radius: 4px;
-            padding: 0.05em 0.3em;
+            font-family: var(--label);
+            font-weight: 700;
+            font-size: 0.92em;
+            background: var(--paper);
+            color: var(--ink);
+            border: 1px solid var(--ink);
+            border-radius: 3px;
+            padding: 0 0.3em;
             box-decoration-break: clone;
             -webkit-box-decoration-break: clone;
         }
 
-        .ph.unknown { text-decoration: underline wavy var(--coral); text-underline-offset: 3px; }
+        .msg-user .ph {
+            background: rgba(245, 247, 251, 0.12);
+            color: var(--paper);
+            border-color: rgba(245, 247, 251, 0.5);
+        }
+
+        .exchange[data-view="ai"] .msg-user .ph {
+            background: var(--paper);
+            color: var(--ink);
+            border-color: var(--ink);
+        }
+
+        .ph.unknown { text-decoration: underline wavy var(--alert); text-underline-offset: 3px; }
 
         .receipt {
             display: flex;
@@ -346,36 +355,36 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             color: var(--ink-soft);
         }
 
-        .receipt strong { color: var(--ink); font-weight: 600; }
+        .receipt strong { color: var(--ink); font-weight: 700; }
 
         .notice {
             font-size: 0.9rem;
             padding: 0.75rem 1rem;
-            border-radius: 12px;
+            border-radius: 10px;
             border: 1px solid var(--line);
             background: var(--paper-deep);
         }
 
-        .notice.warn { color: var(--coral); border-color: #F1C9B5; background: #FFF4E6; }
+        .notice.warn { color: var(--alert); border-color: #F3C4BF; background: #FDF1F0; }
 
-        .notice a { font-weight: 600; }
+        .notice a { font-weight: 700; }
 
-        /* Thinking: Wispr's waveform pill */
+        /* Thinking */
         .waveform {
             display: inline-flex;
             align-items: center;
             gap: 3px;
             height: 2.25rem;
-            padding: 0 1.1rem;
-            border: 1.5px solid var(--ink);
-            border-radius: 999px;
-            background: var(--paper);
+            padding: 0 1rem;
+            border-radius: 8px;
+            background-color: var(--tint);
+            background-image: var(--security);
         }
 
         .waveform i {
             display: block;
             width: 2px;
-            height: 1.6rem;
+            height: 1.5rem;
             border-radius: 2px;
             background: var(--ink);
             transform: scaleY(0.3);
@@ -404,19 +413,19 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             position: sticky;
             bottom: 0;
             padding: 1.25rem 1rem 1rem;
-            background: linear-gradient(rgba(255, 255, 235, 0), var(--paper) 30%);
+            background: linear-gradient(rgba(245, 247, 251, 0), var(--paper) 30%);
         }
 
         .composer {
             max-width: var(--column);
             margin: 0 auto;
             border: 1px solid var(--ink);
-            border-radius: 16px;
-            background: var(--paper);
+            border-radius: 12px;
+            background: #FFFFFF;
             transition: box-shadow 0.25s var(--ease-out);
         }
 
-        .composer:focus-within { box-shadow: 0 6px 24px -10px rgba(26, 26, 26, 0.25); }
+        .composer:focus-within { box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.25); }
 
         .composer textarea {
             display: block;
@@ -433,7 +442,7 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             outline: none;
         }
 
-        .composer textarea::placeholder { color: #6E6E62; }
+        .composer textarea::placeholder { color: #67728F; }
 
         .composer-row {
             display: flex;
@@ -471,7 +480,7 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             cursor: pointer;
         }
 
-        .check input { accent-color: var(--forest); width: 1rem; height: 1rem; }
+        .check input { accent-color: var(--ink); width: 1rem; height: 1rem; }
 
         .count {
             margin-left: auto;
@@ -480,17 +489,17 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             font-variant-numeric: tabular-nums;
         }
 
-        .count.over { color: var(--coral); font-weight: 600; }
+        .count.over { color: var(--alert); font-weight: 700; }
 
         .btn-send {
             display: inline-flex;
             align-items: center;
             gap: 0.45rem;
             font: inherit;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 0.9375rem;
-            color: var(--ink);
-            background: var(--lavender);
+            color: var(--paper);
+            background: var(--ink);
             border: 1px solid var(--ink);
             border-radius: 8px;
             padding: 0.55rem 1rem;
@@ -498,9 +507,10 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             transition: background-color 0.2s var(--ease-out), transform 0.2s var(--ease-out);
         }
 
-        .btn-send:hover:not(:disabled) { background: var(--lavender-deep); }
+        .btn-send:hover:not(:disabled) { background: #22356B; }
         .btn-send:active:not(:disabled) { transform: translateY(1px); }
-        .btn-send:disabled { opacity: 0.45; cursor: not-allowed; }
+        .btn-send:focus-visible { outline-color: var(--marigold-deep); }
+        .btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
 
         .blocklist-field { padding: 0 1.1rem 0.25rem; }
 
@@ -553,11 +563,9 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
     <div class="nav-wrap">
         <nav class="nav" aria-label="Main">
             <a class="wordmark" href="/chat">
-                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-                    <rect x="1" y="6" width="2" height="6" rx="1" fill="currentColor"/>
-                    <rect x="5" y="3" width="2" height="12" rx="1" fill="currentColor"/>
-                    <rect x="9" y="5" width="2" height="8" rx="1" fill="currentColor"/>
-                    <rect x="13" y="7" width="2" height="4" rx="1" fill="currentColor"/>
+                <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true">
+                    <rect x="0.75" y="0.75" width="18.5" height="14.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M1.5 1.5 10 8.5l8.5-7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
                 </svg>
                 Private Chat
             </a>
@@ -581,8 +589,10 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
                 <li><button type="button" data-prompt="Summarise in two lines: Priya Nair called from +44 7911 123456 asking to move her appointment to Friday, and said to email her at priya.nair@example.com."><span class="label">Summarise a voicemail from Priya</span> <span class="go">Try it</span></button></li>
             </ul>
 
-            <div class="ribbon" id="ribbon" aria-hidden="true"></div>
-            <p class="ribbon-caption">This is all the AI sees. Example text.</p>
+            <div class="envelope" aria-hidden="true">
+                <div class="envelope-window" id="ribbon"></div>
+            </div>
+            <p class="envelope-caption">This is all the AI sees. Example text.</p>
         </section>
 
         <section class="thread" id="thread" aria-live="polite" aria-label="Conversation"></section>
@@ -904,7 +914,7 @@ FORM: Conversation column (rank 1 of: conversation column, split before/after, i
             });
         });
 
-        (function buildRibbon() {
+        (function buildEnvelopeWindow() {
             const line = 'Draft a reply to [PERSON_01] confirming our call on [PHONE_01] and copy [EMAIL_01]. Remind [PERSON_02] that the invoice goes to [IBAN_01].';
             for (const part of splitPlaceholders(line)) {
                 els.ribbon.append(part.kind === 'ph' ? el('span', 'ph', part.value) : document.createTextNode(part.value));

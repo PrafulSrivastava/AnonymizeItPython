@@ -31,7 +31,7 @@ The model only ever sees placeholders such as `[PERSON_01]` or `[EMAIL_01]`; the
 
 ## Brand Commitments
 - Product name in UI copy: "Text Anonymization Platform".
-- The user asked for the chat page to follow the visual style of Wispr Flow (https://wisprflow.ai/).
+- The chat page was first modeled on Wispr Flow (https://wisprflow.ai/); the user then asked that it not read as a copy of Wispr. Keep the clean, calm chat structure, but not Wispr's palette or type.
 
 ## Evidence on Hand
 No testimonials, customer logos, benchmarks, or pricing exist. Do not fabricate them.
