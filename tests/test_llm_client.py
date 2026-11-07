@@ -3,7 +3,7 @@ import json
 import httpx
 import pytest
 
-from lib.workflow.llm_client import LLMError, OpenAICompatibleClient
+from lib.workflow.llm_client import LLMError, OpenAICompatibleClient, ToolCall
 
 
 def _client(handler, model=""):
@@ -66,3 +66,35 @@ def test_connection_error_becomes_llm_error():
 def test_unexpected_shape_becomes_llm_error():
     with pytest.raises(LLMError):
         _client(lambda r: httpx.Response(200, json={"oops": True}), model="m").chat([])
+
+
+def test_chat_sends_tools_and_parses_tool_calls():
+    seen = {}
+
+    def handler(request):
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"model": "m", "choices": [{"message": {
+            "content": None,
+            "tool_calls": [{"id": "c1", "type": "function",
+                            "function": {"name": "web_search", "arguments": "{\"query\": \"x\"}"}}],
+        }}]})
+
+    tools = [{"type": "function", "function": {"name": "web_search", "parameters": {}}}]
+    reply = _client(handler, model="m").chat([{"role": "user", "content": "hi"}], tools=tools)
+
+    assert seen["body"]["tools"] == tools
+    assert reply.content == ""
+    assert reply.tool_calls == [ToolCall(id="c1", name="web_search", arguments='{"query": "x"}')]
+
+
+def test_chat_without_tools_omits_tools_key():
+    seen = {}
+
+    def handler(request):
+        seen["body"] = json.loads(request.content)
+        return _completion("ok")
+
+    reply = _client(handler, model="m").chat([{"role": "user", "content": "hi"}])
+
+    assert "tools" not in seen["body"]
+    assert reply.tool_calls == []

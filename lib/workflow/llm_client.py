@@ -4,8 +4,8 @@ Minimal client for OpenAI-compatible chat completion servers (LM Studio, vLLM, O
 
 import os
 import re
-from dataclasses import dataclass
-from typing import Dict, List, Optional
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 import httpx
 
@@ -17,9 +17,17 @@ class LLMError(Exception):
 
 
 @dataclass
+class ToolCall:
+    id: str
+    name: str
+    arguments: str
+
+
+@dataclass
 class LLMReply:
     content: str
     model: str
+    tool_calls: List[ToolCall] = field(default_factory=list)
 
 
 class OpenAICompatibleClient:
@@ -37,7 +45,7 @@ class OpenAICompatibleClient:
         self.timeout = timeout or float(os.getenv("LLM_TIMEOUT_SECONDS", "120"))
         self._transport = transport
 
-    def chat(self, messages: List[Dict[str, str]]) -> LLMReply:
+    def chat(self, messages: List[Dict[str, Any]], tools: Optional[List[Dict[str, Any]]] = None) -> LLMReply:
         try:
             with httpx.Client(
                 base_url=self.base_url,
@@ -46,21 +54,34 @@ class OpenAICompatibleClient:
                 transport=self._transport,
             ) as client:
                 model = self.model or self._first_chat_model(client)
-                response = client.post(
-                    "/chat/completions",
-                    json={"model": model, "messages": messages, "temperature": 0.2},
-                )
+                payload: Dict[str, Any] = {"model": model, "messages": messages, "temperature": 0.2}
+                if tools:
+                    payload["tools"] = tools
+                response = client.post("/chat/completions", json=payload)
                 response.raise_for_status()
                 data = response.json()
         except httpx.HTTPError as exc:
             raise LLMError(f"LLM request failed: {exc}") from exc
 
         try:
-            content = data["choices"][0]["message"]["content"] or ""
-        except (KeyError, IndexError, TypeError) as exc:
-            raise LLMError("LLM response had no choices[0].message.content") from exc
+            message = data["choices"][0]["message"]
+            content = message.get("content") or ""
+            tool_calls = [
+                ToolCall(
+                    id=call.get("id") or "",
+                    name=call["function"]["name"],
+                    arguments=call["function"].get("arguments") or "{}",
+                )
+                for call in message.get("tool_calls") or []
+            ]
+        except (KeyError, IndexError, TypeError, AttributeError) as exc:
+            raise LLMError("LLM response had no usable choices[0].message") from exc
 
-        return LLMReply(content=_THINK_RE.sub("", content).strip(), model=data.get("model") or model)
+        return LLMReply(
+            content=_THINK_RE.sub("", content).strip(),
+            model=data.get("model") or model,
+            tool_calls=tool_calls,
+        )
 
     def _first_chat_model(self, client: httpx.Client) -> str:
         response = client.get("/models")
