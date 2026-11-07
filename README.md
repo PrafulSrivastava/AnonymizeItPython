@@ -9,7 +9,7 @@ This system processes text messages from various sources (chat apps, SMS, emails
 ### Key Features
 
 - **Multi-stage pipeline**: Regex → NER → Blocklist → Scoring → Validation
-- **Dual NER engines**: spaCy (en_core_web_lg, de_core_news_lg) + Microsoft Presidio
+- **Dual NER engines**: spaCy (en_core_web_sm/lg, de_core_news_sm/lg) + Microsoft Presidio
 - **Multilingual support**: English and German language detection
 - **Confidence scoring**: Weighted scoring with routing decisions (pass/pass_flagged/review)
 - **Quasi-identifier detection**: Identifies role + location + age combinations
@@ -369,6 +369,67 @@ pip install --force-reinstall --no-deps \
 
 - Check Pydantic version (must be 2.5.0+)
 - Verify `@field_serializer` in `lib/types.py`
+
+## Deploying to Vercel (hackathon / demo)
+
+### Required environment variables
+
+| Variable | Purpose | Example |
+|---|---|---|
+| `LLM_BASE_URL` | OpenAI-compatible API base URL | `https://api.x.ai/v1` |
+| `LLM_API_KEY` | API key for the LLM | `xai-…` |
+| `LLM_MODEL` | Model identifier | `grok-4.20-0309-non-reasoning` |
+
+All other variables are optional for the demo (see `.env.example` for the full list).
+
+### Optional environment variables
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `SPACY_MODEL_SIZE` | `sm` | Use `lg` locally for higher accuracy |
+| `LLM_TIMEOUT_SECONDS` | `120` | LLM request timeout |
+| `CORS_ORIGINS` | localhost | Comma-separated allowed origins |
+| `POSTGRES_URL` | *(unset)* | Enables usage tracking & auth |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | *(unset)* | Enables Google OAuth |
+| `JWT_SECRET_KEY` | insecure default | Sign JWT cookies (set when using OAuth) |
+| `FREE_TIER_LIMIT` | `5` | Anonymous request limit (requires DB) |
+
+### Steps
+
+1. Push this branch to GitHub (or fork the repo).
+2. Import the project into [Vercel](https://vercel.com/new).
+3. Add the required env vars in **Project → Settings → Environment Variables**.
+4. Deploy. Vercel reads `vercel.json` automatically:
+   - All routes → `api/anonymise.py` (FastAPI via Mangum)
+   - Function runtime: Python 3.12, max duration 60 s
+5. The frontend is served at `/` and `/chat`; the API is at `/api/anonymise` and `/api/chat`.
+
+### Bundle size
+
+The deployment uses `en_core_web_sm` and `de_core_news_sm` (~12 MB and ~16 MB
+compressed wheel) instead of the large models (~600 MB and ~350 MB). The total
+installed package size is roughly 160 MB unzipped — well within Vercel's 250 MB
+limit on Pro/Team plans.
+
+> **Vercel plan requirements**: the LLM calls can take 15–60 seconds, so
+> `maxDuration: 60` is set in `vercel.json`. Hobby plan caps function duration at
+> 10 s, so you need at least a **Pro** plan. The compressed bundle is also likely
+> above the Hobby 50 MB limit; Pro allows 250 MB.
+
+Set `SPACY_MODEL_SIZE=lg` **locally** (and install the lg model wheels) to get
+higher NER accuracy in development.
+
+### Running locally without a database
+
+```bash
+cp .env.example .env
+# edit .env: set LLM_BASE_URL / LLM_API_KEY / LLM_MODEL
+uvicorn api.anonymise:app --reload --port 8000
+```
+
+The app starts, serves the frontend at `http://localhost:8000/`, and both
+`/api/anonymise` and `/api/chat` work without `POSTGRES_URL` (all requests
+are allowed in demo mode).
 
 ## Contributing
 

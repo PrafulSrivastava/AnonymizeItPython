@@ -10,14 +10,21 @@ from presidio_analyzer import AnalyzerEngine
 from lib.types import RedactionToken
 
 # Module-level model initialization (runs once per container)
-# This is critical for Vercel serverless performance
+# Use small models by default (fits Vercel's bundle limits).
+# Set SPACY_MODEL_SIZE=lg to use the large models for local development
+# (requires en_core_web_lg / de_core_news_lg to be installed separately).
+import os as _os
+_model_size = _os.getenv("SPACY_MODEL_SIZE", "sm").lower()
+_en_model = f"en_core_web_{_model_size}"
+_de_model = f"de_core_news_{_model_size}"
+
 try:
-    nlp_en = spacy.load("en_core_web_lg")
-    nlp_de = spacy.load("de_core_news_lg")
+    nlp_en = spacy.load(_en_model)
+    nlp_de = spacy.load(_de_model)
     analyzer = AnalyzerEngine()
     MODELS_LOADED = True
 except Exception as e:
-    print(f"Warning: Failed to load NER models: {e}")
+    print(f"Warning: Failed to load NER models ({_en_model}, {_de_model}): {e}")
     nlp_en = None
     nlp_de = None
     analyzer = None

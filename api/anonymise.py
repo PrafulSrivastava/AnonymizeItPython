@@ -122,12 +122,22 @@ async def chat_page():
 
 # Authentication Endpoints
 
+def _require_oauth():
+    """Raise 503 when Google OAuth credentials are not configured."""
+    if not oauth.google:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google OAuth is not configured on this deployment.",
+        )
+
+
 @app.get("/api/auth/login")
 async def login(request: Request):
     """
     Initiate Google OAuth login flow.
     Redirects user to Google's authorization page.
     """
+    _require_oauth()
     redirect_uri = request.url_for('auth_callback')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
@@ -138,6 +148,7 @@ async def auth_callback(request: Request, db: Session = Depends(get_db_dependenc
     Handle Google OAuth callback.
     Creates or updates user record and sets JWT cookie.
     """
+    _require_oauth()
     try:
         # Exchange authorization code for access token
         token = await oauth.google.authorize_access_token(request)
