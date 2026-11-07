@@ -114,3 +114,23 @@ class AnonymiseResponse(BaseModel):
             }
         }
     }
+
+
+class ChatRequest(BaseModel):
+    """Request body for the private chat workflow."""
+    prompt: str = Field(..., min_length=1, max_length=MAX_WORKFLOW_CHARS, description="Prompt that may contain PII")
+    blocklist: str = Field(default="", description="Comma-separated list of extra terms to redact")
+    strict: bool = Field(default=False, description="Refuse to call the LLM when routing is 'review'")
+
+
+class ChatResponse(BaseModel):
+    """Re-enriched LLM answer plus what was actually sent to the model."""
+    answer: str = Field(..., description="LLM answer with original values restored")
+    anonymizedPrompt: str = Field(..., description="Exact prompt text sent to the LLM")
+    anonymizedAnswer: str = Field(..., description="LLM answer before re-enrichment")
+    placeholdersSent: List[str] = Field(default_factory=list)
+    placeholdersRestored: List[str] = Field(default_factory=list)
+    unknownPlaceholders: List[str] = Field(default_factory=list, description="Placeholders the LLM emitted that were never sent")
+    routing: RoutingDecision
+    flags: dict = Field(default_factory=dict)
+    model: str

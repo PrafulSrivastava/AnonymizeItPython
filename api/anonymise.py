@@ -20,7 +20,7 @@ from datetime import datetime
 from typing import Optional
 import os
 
-from lib.types import PipelineInput, AnonymiseResponse
+from lib.types import PipelineInput, AnonymiseResponse, ChatRequest, ChatResponse
 from lib.pipeline.index import run_pipeline
 from lib.auth.oauth import oauth
 from lib.auth.jwt import create_access_token
@@ -34,6 +34,9 @@ from lib.usage.tracker import (
     increment_user_usage,
     get_usage_stats
 )
+from lib.workflow.llm_client import OpenAICompatibleClient, LLMError
+from lib.workflow.private_chat import run_private_chat, PrivacyRoutingError
+from lib.workflow.vault import VaultIntegrityError
 
 
 # Initialize FastAPI app
@@ -296,6 +299,65 @@ async def anonymise(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Processing error: {str(e)}"
         )
+
+
+def get_llm_client() -> OpenAICompatibleClient:
+    return OpenAICompatibleClient()
+
+
+@app.post("/api/chat", response_model=ChatResponse, status_code=status.HTTP_200_OK)
+def private_chat(
+    body: ChatRequest,
+    user: Optional[User] = Depends(optional_user),
+    llm: OpenAICompatibleClient = Depends(get_llm_client),
+):
+    """
+    Anonymize the prompt, send only the anonymized text to the configured LLM,
+    and return the answer with the original values restored.
+    """
+    if user:
+        if not check_user_usage(user.id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Usage quota exceeded. Please upgrade your plan."
+            )
+    elif not check_anonymous_usage():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Free tier limit reached. Please login to continue."
+        )
+
+    try:
+        result = run_private_chat(body.prompt, llm, blocklist=body.blocklist, strict=body.strict)
+    except PrivacyRoutingError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"message": "Prompt not sent: anonymization needs review", "reasons": exc.reasons}
+        )
+    except VaultIntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Anonymization produced a placeholder that cannot be restored; prompt was not sent"
+        )
+    except LLMError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc))
+
+    if user:
+        increment_user_usage(user.id)
+    else:
+        increment_anonymous_usage()
+
+    return ChatResponse(
+        answer=result.answer,
+        anonymizedPrompt=result.anonymized_prompt,
+        anonymizedAnswer=result.anonymized_answer,
+        placeholdersSent=result.placeholders_sent,
+        placeholdersRestored=result.placeholders_restored,
+        unknownPlaceholders=result.unknown_placeholders,
+        routing=result.routing,
+        flags=result.flags,
+        model=result.model,
+    )
 
 
 # Vercel serverless handler (ASGI adapter)
