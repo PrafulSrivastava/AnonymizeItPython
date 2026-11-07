@@ -240,6 +240,16 @@ LLM saw), `anonymizedAnswer`, the placeholders sent and restored, any
 Prompts are limited to 8000 characters. Set `"strict": true` to refuse sending
 prompts the anonymizer routes to `review` (HTTP 422).
 
+#### Web search (optional)
+
+- Set `EXA_API_KEY` in `.env` to show a "Search the web" toggle in the chat. `GET /api/chat/config`
+  reports whether it is available, and `POST /api/chat` accepts `"webSearch": true`.
+- The model decides when to search, up to 3 searches per message.
+- Every query is checked before it is sent to Exa. It is blocked if it contains placeholders,
+  your original values, or a detected name, email, phone number, IBAN, birth date or handle.
+  Strict mode blocks any detection.
+- The response lists the queries sent (`searches`) and the source links (`sources`).
+
 ## Token Types
 
 | Type | Description | Example |

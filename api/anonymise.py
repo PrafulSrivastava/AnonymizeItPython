@@ -20,7 +20,7 @@ from datetime import datetime
 from typing import Optional
 import os
 
-from lib.types import PipelineInput, AnonymiseResponse, ChatRequest, ChatResponse
+from lib.types import PipelineInput, AnonymiseResponse, ChatRequest, ChatResponse, ChatConfig, SearchRecord, SourceLink
 from lib.pipeline.index import run_pipeline
 from lib.auth.oauth import oauth
 from lib.auth.jwt import create_access_token
@@ -37,6 +37,7 @@ from lib.usage.tracker import (
 from lib.workflow.llm_client import OpenAICompatibleClient, LLMError
 from lib.workflow.private_chat import run_private_chat, PrivacyRoutingError
 from lib.workflow.vault import VaultIntegrityError
+from lib.workflow.web_search import ExaSearchClient
 
 
 # Initialize FastAPI app
@@ -315,11 +316,22 @@ def get_llm_client() -> OpenAICompatibleClient:
     return OpenAICompatibleClient()
 
 
+def get_search_client() -> Optional[ExaSearchClient]:
+    return ExaSearchClient() if os.getenv("EXA_API_KEY") else None
+
+
+@app.get("/api/chat/config", response_model=ChatConfig)
+def chat_config(search: Optional[ExaSearchClient] = Depends(get_search_client)):
+    """Tell the chat UI which optional features the server has configured."""
+    return ChatConfig(webSearch=search is not None)
+
+
 @app.post("/api/chat", response_model=ChatResponse, status_code=status.HTTP_200_OK)
 def private_chat(
     body: ChatRequest,
     user: Optional[User] = Depends(optional_user),
     llm: OpenAICompatibleClient = Depends(get_llm_client),
+    search: Optional[ExaSearchClient] = Depends(get_search_client),
 ):
     """
     Anonymize the prompt, send only the anonymized text to the configured LLM,
@@ -338,7 +350,10 @@ def private_chat(
         )
 
     try:
-        result = run_private_chat(body.prompt, llm, blocklist=body.blocklist, strict=body.strict)
+        result = run_private_chat(
+            body.prompt, llm, blocklist=body.blocklist, strict=body.strict,
+            search=search if body.webSearch else None,
+        )
     except PrivacyRoutingError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -367,6 +382,11 @@ def private_chat(
         routing=result.routing,
         flags=result.flags,
         model=result.model,
+        searches=[
+            SearchRecord(query=s.query, status=s.status, resultCount=s.result_count)
+            for s in result.searches
+        ],
+        sources=[SourceLink(title=s.title, url=s.url) for s in result.sources],
     )
 
 

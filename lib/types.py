@@ -121,6 +121,23 @@ class ChatRequest(BaseModel):
     prompt: str = Field(..., min_length=1, max_length=MAX_WORKFLOW_CHARS, description="Prompt that may contain PII")
     blocklist: str = Field(default="", description="Comma-separated list of extra terms to redact")
     strict: bool = Field(default=False, description="Refuse to call the LLM when routing is 'review'")
+    webSearch: bool = Field(default=False, description="Let the model search the web via Exa")
+
+
+class SearchRecord(BaseModel):
+    """One web search the model asked for."""
+    query: str
+    status: Literal["sent", "blocked", "failed"]
+    resultCount: int = 0
+
+
+class SourceLink(BaseModel):
+    title: str
+    url: str
+
+
+class ChatConfig(BaseModel):
+    webSearch: bool
 
 
 class ChatResponse(BaseModel):
@@ -134,3 +151,5 @@ class ChatResponse(BaseModel):
     routing: RoutingDecision
     flags: dict = Field(default_factory=dict)
     model: str
+    searches: List[SearchRecord] = Field(default_factory=list)
+    sources: List[SourceLink] = Field(default_factory=list)
