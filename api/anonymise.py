@@ -55,10 +55,16 @@ app.add_middleware(
     https_only=False  # Set to True in production with HTTPS
 )
 
-# Add CORS middleware
+# CORS: credentials cannot be used with allow_origins=["*"] (browser blocks cross-origin fetch).
+_default_origins = "http://localhost:8000,http://127.0.0.1:8000"
+_cors_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", _default_origins).split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
