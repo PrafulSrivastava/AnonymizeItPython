@@ -32,6 +32,7 @@ pyahocorasick==2.0.0
 # Testing
 requests==2.31.0
 httpx==0.27.0
+pytest==8.3.4
 
 # spaCy language models (direct wheel URLs for Vercel deployment)
 https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl

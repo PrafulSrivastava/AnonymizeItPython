@@ -205,19 +205,9 @@ class BlocklistMatcher:
 
             # Check if token's original text matches any blocklist term
             if token.original and token.original.lower() in blocklist_lower:
-                # Override type to BLOCKLIST
+                # Only the type changes: token.value is already embedded in the
+                # cleaned text, so renaming it would orphan that placeholder.
                 token.type = "BLOCKLIST"
-                # Update value to use BLOCKLIST format
-                # Keep the existing number if it has one, otherwise use generic
-                if '_' in token.value and token.value.count('_') == 1:
-                    # Extract number from existing token (e.g., [PERSON_01] -> 01)
-                    try:
-                        num = token.value.split('_')[1].rstrip(']')
-                        token.value = f"[BLOCKLIST_{num}]"
-                    except:
-                        token.value = f"[BLOCKLIST_01]"
-                else:
-                    token.value = f"[BLOCKLIST_01]"
 
         return existing_tokens
 
