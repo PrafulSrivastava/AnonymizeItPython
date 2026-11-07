@@ -1,20 +1,11 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/anonymise.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "api/anonymise.py"
-    }
-  ],
   "functions": {
     "api/anonymise.py": {
       "maxDuration": 60
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/anonymise" }
+  ]
 }

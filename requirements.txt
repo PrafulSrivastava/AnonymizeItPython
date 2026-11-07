@@ -9,12 +9,10 @@ pydantic==2.10.5
 # Environment variables
 python-dotenv==1.0.0
 
-# Database (optional – not required for the demo deployment)
-sqlalchemy==2.0.25
-psycopg2-binary==2.9.9
-
-# Authentication
-python-jose[cryptography]==3.3.0
+# Authentication helpers (all optional – only used when OAuth/DB env vars are set)
+# python-jose without the [cryptography] extra: HS256 uses Python's stdlib hmac,
+# so the heavy cryptography wheel is not needed for JWT signing/verification.
+python-jose==3.3.0
 authlib==1.3.0
 itsdangerous==2.1.2
 python-multipart==0.0.6
@@ -32,7 +30,13 @@ pyahocorasick==2.0.0
 # HTTP client (used by LLM client)
 httpx==0.27.0
 
-# spaCy language models – small models for Vercel deployment (~12 MB each).
-# Set SPACY_MODEL_SIZE=lg locally to load the large models instead (see ner_engine.py).
+# spaCy language models – small models for Vercel deployment.
+# en_core_web_sm ≈ 12.8 MB compressed, de_core_news_sm ≈ 15 MB compressed.
+# Set SPACY_MODEL_SIZE=lg locally (+ install lg wheels) for higher accuracy.
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.8.0/de_core_news_sm-3.8.0-py3-none-any.whl
+
+# NOTE: sqlalchemy and psycopg2-binary are intentionally omitted here.
+# The app handles their absence gracefully (DB_AVAILABLE=False).
+# To enable database features locally or on Pro/Team Vercel:
+#   pip install sqlalchemy==2.0.25 psycopg2-binary==2.9.9

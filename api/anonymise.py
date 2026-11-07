@@ -15,8 +15,12 @@ from fastapi.responses import RedirectResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from mangum import Mangum
-from sqlalchemy.orm import Session
 from datetime import datetime
+
+try:
+    from sqlalchemy.orm import Session as _SASession
+except ImportError:
+    _SASession = None  # type: ignore[assignment,misc]
 from typing import Optional
 import os
 
@@ -143,7 +147,7 @@ async def login(request: Request):
 
 
 @app.get("/api/auth/callback")
-async def auth_callback(request: Request, db: Session = Depends(get_db_dependency)):
+async def auth_callback(request: Request, db=Depends(get_db_dependency)):
     """
     Handle Google OAuth callback.
     Creates or updates user record and sets JWT cookie.
