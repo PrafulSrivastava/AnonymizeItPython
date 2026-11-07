@@ -110,6 +110,16 @@ async def root():
     }
 
 
+@app.get("/chat")
+async def chat_page():
+    """Serve the private chat UI."""
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    chat_path = os.path.join(os.path.dirname(current_dir), "public", "chat.html")
+    if not os.path.exists(chat_path):
+        raise HTTPException(status_code=404, detail="Chat page not found")
+    return FileResponse(chat_path)
+
+
 # Authentication Endpoints
 
 @app.get("/api/auth/login")

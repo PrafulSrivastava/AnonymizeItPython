@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<!--
+THESIS: A chat where privacy is visible on demand. Every exchange can flip between what you see and what the AI saw; it refuses the dashboard-of-scores arrangement of the tester page.
+OWN-WORLD: Wispr Flow's paper ground (#FFFFEB), EB Garamond display with an italic turn, Figtree UI, 1px ink outlines, lavender primary, forest placeholder tokens.
+STORY: The visitor asks something containing personal details, gets a natural answer with their real details back, and can check that the AI only saw placeholders.
+FIRST VIEWPORT: Announcement bar; floating nav pill (wordmark, Chat/Anonymizer switch); centered serif headline "Ask anything, privately."; one line of explanation; three prompt suggestions; a tilted ink ribbon showing a placeholder sentence; composer pinned to the bottom with the lavender Send button.
+FORM: Conversation column (rank 1 of: conversation column, split before/after, inspector drawer). Pinned brief; no seed run.
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Chat · Text Anonymization Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper: #FFFFEB;
+            --paper-deep: #F6F5DC;
+            --line: #E4E4D0;
+            --ink: #1A1A1A;
+            --ink-soft: #55554A;
+            --lavender: #F0D7FF;
+            --lavender-deep: #E4C2FA;
+            --forest: #1F4A3D;
+            --forest-tint: #E2EADB;
+            --coral: #C2410C;
+            --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --column: 46rem;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { -webkit-text-size-adjust: 100%; }
+
+        body {
+            font-family: "Figtree", system-ui, sans-serif;
+            font-size: 1rem;
+            line-height: 1.55;
+            color: var(--ink);
+            background: var(--paper);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        a { color: inherit; }
+
+        :focus-visible {
+            outline: 2px solid var(--ink);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+        }
+
+        /* Announcement bar */
+        .announce {
+            background: var(--forest);
+            color: var(--paper);
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.6rem 1rem;
+        }
+
+        /* Nav pill */
+        .nav-wrap {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding: 0.9rem 1rem 0.5rem;
+            background: linear-gradient(var(--paper) 70%, rgba(255, 255, 235, 0));
+        }
+
+        .nav {
+            max-width: var(--column);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.4rem 0.4rem 0.4rem 1rem;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--paper);
+        }
+
+        .wordmark {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .wordmark svg { flex: none; }
+
+        .segmented {
+            display: inline-flex;
+            padding: 3px;
+            gap: 2px;
+            border-radius: 999px;
+            background: var(--line);
+        }
+
+        .segmented a,
+        .segmented button {
+            font: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--ink-soft);
+            text-decoration: none;
+            background: transparent;
+            border: 0;
+            border-radius: 999px;
+            padding: 0.3rem 0.85rem;
+            cursor: pointer;
+            transition: background-color 0.25s var(--ease-out), color 0.25s var(--ease-out);
+        }
+
+        .segmented a:hover,
+        .segmented button:hover { color: var(--ink); }
+
+        .segmented [aria-current="page"],
+        .segmented [aria-pressed="true"] {
+            background: var(--paper);
+            color: var(--ink);
+            box-shadow: 0 1px 2px rgba(26, 26, 26, 0.08);
+        }
+
+        .nav-model {
+            margin-left: auto;
+            font-size: 0.8125rem;
+            color: var(--ink-soft);
+            padding-right: 0.6rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Main column */
+        main {
+            flex: 1;
+            width: 100%;
+            max-width: var(--column);
+            margin: 0 auto;
+            padding: 0 1rem 2rem;
+        }
+
+        /* Empty state */
+        .intro {
+            text-align: center;
+            padding: 4.5rem 0 1.5rem;
+        }
+
+        .kicker {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-bottom: 1.25rem;
+        }
+
+        .intro h1 {
+            font-family: "EB Garamond", Georgia, serif;
+            font-weight: 400;
+            font-size: clamp(3rem, 9vw, 5.25rem);
+            line-height: 0.98;
+            letter-spacing: -0.02em;
+            text-wrap: balance;
+        }
+
+        .intro h1 em { font-style: italic; }
+
+        .intro p.lede {
+            max-width: 32rem;
+            margin: 1.5rem auto 0;
+            font-size: 1.125rem;
+            color: var(--ink-soft);
+            text-wrap: pretty;
+        }
+
+        .suggestions {
+            list-style: none;
+            margin: 2.75rem auto 0;
+            max-width: 34rem;
+            text-align: left;
+            border-top: 1px solid var(--line);
+        }
+
+        .suggestions li { border-bottom: 1px solid var(--line); }
+
+        .suggestions button {
+            width: 100%;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+            text-align: left;
+            font-family: "EB Garamond", Georgia, serif;
+            font-size: 1.3rem;
+            line-height: 1.3;
+            color: var(--ink);
+            background: none;
+            border: 0;
+            padding: 0.9rem 0.25rem;
+            cursor: pointer;
+        }
+
+        .suggestions .label { transition: transform 0.3s var(--ease-out); }
+
+        .suggestions button:hover .label { transform: translateX(0.5rem); }
+
+        .suggestions .go {
+            font-family: "Figtree", sans-serif;
+            font-size: 0.875rem;
+            color: var(--ink-soft);
+            flex: none;
+        }
+
+        /* Ribbon: what the model sees */
+        .ribbon {
+            margin: 3.5rem calc(50% - 50vw) 0;
+            transform: rotate(-2deg);
+            background: var(--ink);
+            color: var(--paper);
+            padding: 0.75rem 1.5rem;
+            font-size: 1.05rem;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ribbon .ph {
+            background: rgba(255, 255, 235, 0.14);
+            color: var(--paper);
+        }
+
+        .ribbon-caption {
+            margin-top: 1.25rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--ink-soft);
+        }
+
+        /* Conversation */
+        .thread {
+            display: flex;
+            flex-direction: column;
+            gap: 2.75rem;
+            padding-top: 1.5rem;
+        }
+
+        .exchange { display: flex; flex-direction: column; gap: 1.25rem; }
+
+        .exchange-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .exchange-bar .when {
+            font-size: 0.8125rem;
+            color: var(--ink-soft);
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            max-width: 85%;
+            background: var(--ink);
+            color: var(--paper);
+            padding: 0.85rem 1.1rem;
+            border-radius: 16px 16px 4px 16px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .msg-user .real {
+            background: rgba(240, 215, 255, 0.28);
+            color: var(--paper);
+        }
+
+        .msg-user .ph {
+            background: rgba(226, 234, 219, 0.18);
+            color: var(--paper);
+        }
+
+        .msg-ai {
+            font-size: 1.0625rem;
+            line-height: 1.65;
+            max-width: 68ch;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .view-body { transition: opacity 0.28s var(--ease-out), filter 0.28s var(--ease-out); }
+
+        .view-body.swapping { opacity: 0; filter: blur(4px); }
+
+        .exchange[data-view="ai"] .msg-user,
+        .exchange[data-view="ai"] .msg-ai {
+            outline: 1px dashed var(--forest);
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+
+        .exchange[data-view="ai"] .msg-user { border-radius: 16px 16px 4px 16px; }
+
+        .real {
+            background: var(--lavender);
+            border-radius: 4px;
+            padding: 0 0.2em;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+        }
+
+        .ph {
+            font-family: var(--mono);
+            font-size: 0.86em;
+            background: var(--forest-tint);
+            color: var(--forest);
+            border-radius: 4px;
+            padding: 0.05em 0.3em;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+        }
+
+        .ph.unknown { text-decoration: underline wavy var(--coral); text-underline-offset: 3px; }
+
+        .receipt {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem 1rem;
+            font-size: 0.875rem;
+            color: var(--ink-soft);
+        }
+
+        .receipt strong { color: var(--ink); font-weight: 600; }
+
+        .notice {
+            font-size: 0.9rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: var(--paper-deep);
+        }
+
+        .notice.warn { color: var(--coral); border-color: #F1C9B5; background: #FFF4E6; }
+
+        .notice a { font-weight: 600; }
+
+        /* Thinking: Wispr's waveform pill */
+        .waveform {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            height: 2.25rem;
+            padding: 0 1.1rem;
+            border: 1.5px solid var(--ink);
+            border-radius: 999px;
+            background: var(--paper);
+        }
+
+        .waveform i {
+            display: block;
+            width: 2px;
+            height: 1.6rem;
+            border-radius: 2px;
+            background: var(--ink);
+            transform: scaleY(0.3);
+            animation: breathe 1.1s var(--ease-out) infinite alternate;
+        }
+
+        .waveform i:nth-child(2n) { animation-delay: -0.35s; }
+        .waveform i:nth-child(3n) { animation-delay: -0.7s; }
+        .waveform i:nth-child(5n) { animation-delay: -0.15s; }
+
+        @keyframes breathe {
+            from { transform: scaleY(0.25); }
+            to { transform: scaleY(1); }
+        }
+
+        .thinking {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            color: var(--ink-soft);
+            font-size: 0.9rem;
+        }
+
+        /* Composer */
+        .composer-wrap {
+            position: sticky;
+            bottom: 0;
+            padding: 1.25rem 1rem 1rem;
+            background: linear-gradient(rgba(255, 255, 235, 0), var(--paper) 30%);
+        }
+
+        .composer {
+            max-width: var(--column);
+            margin: 0 auto;
+            border: 1px solid var(--ink);
+            border-radius: 16px;
+            background: var(--paper);
+            transition: box-shadow 0.25s var(--ease-out);
+        }
+
+        .composer:focus-within { box-shadow: 0 6px 24px -10px rgba(26, 26, 26, 0.25); }
+
+        .composer textarea {
+            display: block;
+            width: 100%;
+            min-height: 3.5rem;
+            max-height: 14rem;
+            resize: none;
+            font: inherit;
+            font-size: 1.0625rem;
+            color: var(--ink);
+            background: transparent;
+            border: 0;
+            padding: 1rem 1.1rem 0.5rem;
+            outline: none;
+        }
+
+        .composer textarea::placeholder { color: #6E6E62; }
+
+        .composer-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.6rem 0.6rem 1.1rem;
+        }
+
+        .composer-options {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: var(--ink-soft);
+        }
+
+        .link-button {
+            font: inherit;
+            color: var(--ink-soft);
+            background: none;
+            border: 0;
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-color: var(--line);
+            text-underline-offset: 3px;
+        }
+
+        .link-button:hover { color: var(--ink); text-decoration-color: var(--ink); }
+
+        .check {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+        }
+
+        .check input { accent-color: var(--forest); width: 1rem; height: 1rem; }
+
+        .count {
+            margin-left: auto;
+            font-size: 0.8125rem;
+            color: var(--ink-soft);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .count.over { color: var(--coral); font-weight: 600; }
+
+        .btn-send {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font: inherit;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: var(--ink);
+            background: var(--lavender);
+            border: 1px solid var(--ink);
+            border-radius: 8px;
+            padding: 0.55rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+        }
+
+        .btn-send:hover:not(:disabled) { background: var(--lavender-deep); }
+        .btn-send:active:not(:disabled) { transform: translateY(1px); }
+        .btn-send:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        .blocklist-field { padding: 0 1.1rem 0.25rem; }
+
+        .blocklist-field label {
+            display: block;
+            font-size: 0.8125rem;
+            color: var(--ink-soft);
+            margin-bottom: 0.3rem;
+        }
+
+        .blocklist-field input {
+            width: 100%;
+            font: inherit;
+            font-size: 0.9375rem;
+            color: var(--ink);
+            background: var(--paper-deep);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 0.5rem 0.7rem;
+        }
+
+        .blocklist-field input:focus { outline: 2px solid var(--ink); outline-offset: 0; }
+
+        .fineprint {
+            max-width: var(--column);
+            margin: 0.6rem auto 0;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--ink-soft);
+        }
+
+        @media (max-width: 640px) {
+            .nav-model { display: none; }
+            .intro { padding-top: 2.5rem; }
+            .msg-user { max-width: 92%; }
+            .composer-row { flex-wrap: wrap; }
+            .count { margin-left: 0; }
+            .btn-send { margin-left: auto; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .waveform i { animation: none; transform: scaleY(0.6); }
+            .view-body, .suggestions .label, .btn-send { transition: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="announce">Names, emails, phone numbers and bank details are hidden before your message reaches the AI.</div>
+
+    <div class="nav-wrap">
+        <nav class="nav" aria-label="Main">
+            <a class="wordmark" href="/chat">
+                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                    <rect x="1" y="6" width="2" height="6" rx="1" fill="currentColor"/>
+                    <rect x="5" y="3" width="2" height="12" rx="1" fill="currentColor"/>
+                    <rect x="9" y="5" width="2" height="8" rx="1" fill="currentColor"/>
+                    <rect x="13" y="7" width="2" height="4" rx="1" fill="currentColor"/>
+                </svg>
+                Private Chat
+            </a>
+            <div class="segmented">
+                <a href="/chat" aria-current="page">Chat</a>
+                <a href="/">Anonymizer</a>
+            </div>
+            <span class="nav-model" id="navModel"></span>
+        </nav>
+    </div>
+
+    <main>
+        <section class="intro" id="intro">
+            <p class="kicker">Private chat</p>
+            <h1>Ask anything,<br><em>privately.</em></h1>
+            <p class="lede">Write the way you normally would. Your personal details are swapped for placeholders, the AI answers, and your details are put back before you read it.</p>
+
+            <ul class="suggestions" aria-label="Try an example">
+                <li><button type="button" data-prompt="Draft a short, friendly reply to Marcus Weber (marcus.weber@acmecorp.com) confirming our call tomorrow on +49 170 555 0198."><span class="label">Reply to Marcus about tomorrow's call</span> <span class="go">Try it</span></button></li>
+                <li><button type="button" data-prompt="Write a polite reminder to Anna Schmidt (anna.schmidt@example.org) that invoice 2291 is overdue. Payment can go to IBAN DE89 3704 0044 0532 0130 00."><span class="label">Chase Anna's overdue invoice</span> <span class="go">Try it</span></button></li>
+                <li><button type="button" data-prompt="Summarise in two lines: Priya Nair called from +44 7911 123456 asking to move her appointment to Friday, and said to email her at priya.nair@example.com."><span class="label">Summarise a voicemail from Priya</span> <span class="go">Try it</span></button></li>
+            </ul>
+
+            <div class="ribbon" id="ribbon" aria-hidden="true"></div>
+            <p class="ribbon-caption">This is all the AI sees. Example text.</p>
+        </section>
+
+        <section class="thread" id="thread" aria-live="polite" aria-label="Conversation"></section>
+    </main>
+
+    <div class="composer-wrap">
+        <form class="composer" id="composer">
+            <label class="sr-only" for="prompt">Message</label>
+            <textarea id="prompt" rows="1" maxlength="8000" placeholder="Message the AI privately"></textarea>
+            <div class="blocklist-field" id="blocklistField" hidden>
+                <label for="blocklist">Also hide these words (comma-separated)</label>
+                <input id="blocklist" type="text" placeholder="e.g. Marcus, Project Falcon" autocomplete="off">
+            </div>
+            <div class="composer-row">
+                <div class="composer-options">
+                    <button type="button" class="link-button" id="blocklistToggle" aria-expanded="false" aria-controls="blocklistField">Hide extra words</button>
+                    <label class="check"><input type="checkbox" id="strict"> Don't send if unsure</label>
+                </div>
+                <span class="count" id="count">0 / 8,000</span>
+                <button type="submit" class="btn-send" id="send" disabled>
+                    Send
+                    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h9M7.5 3.5 11 7l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+        </form>
+        <p class="fineprint">Each message is sent on its own; the AI doesn't remember earlier messages. Detection can miss things, so switch to "The AI" to check what was sent.</p>
+    </div>
+
+    <script>
+        const MAX_CHARS = 8000;
+        const PLACEHOLDER = /\[SENDER\]|\[(?:PHONE|EMAIL|URL|HANDLE|AGE|DOB|PERSON|ORG|LOCATION|IBAN|BLOCKLIST)_[0-9A-Za-z]+\]/gi;
+
+        const els = {
+            intro: document.getElementById('intro'),
+            thread: document.getElementById('thread'),
+            form: document.getElementById('composer'),
+            prompt: document.getElementById('prompt'),
+            blocklist: document.getElementById('blocklist'),
+            blocklistField: document.getElementById('blocklistField'),
+            blocklistToggle: document.getElementById('blocklistToggle'),
+            strict: document.getElementById('strict'),
+            count: document.getElementById('count'),
+            send: document.getElementById('send'),
+            navModel: document.getElementById('navModel'),
+            ribbon: document.getElementById('ribbon'),
+        };
+
+        let busy = false;
+
+        function splitPlaceholders(text) {
+            const parts = [];
+            let last = 0;
+            for (const match of text.matchAll(PLACEHOLDER)) {
+                if (match.index > last) parts.push({ kind: 'text', value: text.slice(last, match.index) });
+                parts.push({ kind: 'ph', value: match[0] });
+                last = match.index + match[0].length;
+            }
+            if (last < text.length) parts.push({ kind: 'text', value: text.slice(last) });
+            return parts;
+        }
+
+        // Pairs each placeholder in the anonymized text with the span of real text it stands for.
+        // Returns null when the two texts cannot be lined up, so callers fall back to plain text.
+        function align(anonText, realText) {
+            const parts = splitPlaceholders(anonText);
+            const out = new Array(parts.length);
+            let budget = 20000;
+
+            function walk(i, pos) {
+                if (--budget < 0) return false;
+                if (i === parts.length) return pos === realText.length;
+                const part = parts[i];
+                if (part.kind === 'text') {
+                    if (!realText.startsWith(part.value, pos)) return false;
+                    out[i] = part;
+                    return walk(i + 1, pos + part.value.length);
+                }
+                const next = parts[i + 1];
+                if (!next) {
+                    out[i] = { ...part, real: realText.slice(pos) };
+                    return true;
+                }
+                if (next.kind !== 'text') return false;
+                let end = realText.indexOf(next.value, pos + 1);
+                while (end !== -1) {
+                    out[i] = { ...part, real: realText.slice(pos, end) };
+                    if (walk(i + 1, end)) return true;
+                    end = realText.indexOf(next.value, end + 1);
+                }
+                return false;
+            }
+
+            return walk(0, 0) ? out : null;
+        }
+
+        function renderInto(node, parts, view, fallbackText) {
+            node.replaceChildren();
+            if (!parts) {
+                node.textContent = fallbackText;
+                return;
+            }
+            for (const part of parts) {
+                if (part.kind === 'text') {
+                    node.append(document.createTextNode(part.value));
+                    continue;
+                }
+                const unknown = part.real.toUpperCase() === part.value.toUpperCase();
+                const span = document.createElement('span');
+                if (view === 'ai' || unknown) {
+                    span.className = unknown ? 'ph unknown' : 'ph';
+                    span.textContent = part.value;
+                    if (unknown) span.title = 'The AI used a placeholder that was not in your message, so it could not be filled in.';
+                } else {
+                    span.className = 'real';
+                    span.textContent = part.real;
+                    span.title = `The AI saw this as ${part.value}`;
+                }
+                node.append(span);
+            }
+        }
+
+        function el(tag, className, text) {
+            const node = document.createElement(tag);
+            if (className) node.className = className;
+            if (text !== undefined) node.textContent = text;
+            return node;
+        }
+
+        function timeLabel() {
+            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function buildExchange(promptText) {
+            const exchange = el('article', 'exchange');
+            exchange.dataset.view = 'you';
+
+            const bar = el('div', 'exchange-bar');
+            bar.append(el('span', 'when', timeLabel()));
+            exchange.append(bar);
+
+            const user = el('div', 'msg-user view-body', promptText);
+            exchange.append(user);
+
+            const thinking = el('div', 'thinking');
+            const wave = el('span', 'waveform');
+            wave.setAttribute('aria-hidden', 'true');
+            for (let i = 0; i < 14; i++) wave.append(document.createElement('i'));
+            thinking.append(wave, el('span', '', 'Hiding your details and asking the AI…'));
+            exchange.append(thinking);
+
+            els.thread.append(exchange);
+            exchange.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            return { exchange, bar, user, thinking };
+        }
+
+        function addViewSwitch(ctx, data, promptText) {
+            const promptParts = align(data.anonymizedPrompt, promptText);
+            const answerParts = align(data.anonymizedAnswer, data.answer);
+
+            const answer = el('div', 'msg-ai view-body');
+            ctx.exchange.append(answer);
+
+            const paint = (view) => {
+                renderInto(ctx.user, promptParts, view, view === 'ai' ? data.anonymizedPrompt : promptText);
+                renderInto(answer, answerParts, view, view === 'ai' ? data.anonymizedAnswer : data.answer);
+            };
+
+            const group = el('div', 'segmented');
+            group.setAttribute('role', 'group');
+            group.setAttribute('aria-label', 'Whose view');
+            const buttons = [['you', 'You'], ['ai', 'The AI']].map(([view, label]) => {
+                const button = el('button', '', label);
+                button.type = 'button';
+                button.setAttribute('aria-pressed', String(view === 'you'));
+                button.addEventListener('click', () => {
+                    if (ctx.exchange.dataset.view === view) return;
+                    ctx.exchange.dataset.view = view;
+                    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+                    const bodies = [ctx.user, answer];
+                    bodies.forEach((b) => b.classList.add('swapping'));
+                    setTimeout(() => {
+                        paint(view);
+                        bodies.forEach((b) => b.classList.remove('swapping'));
+                    }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160);
+                });
+                return button;
+            });
+            group.append(...buttons);
+            ctx.bar.append(group);
+
+            paint('you');
+        }
+
+        function addReceipt(ctx, data) {
+            const hidden = data.placeholdersSent.length;
+            const receipt = el('div', 'receipt');
+
+            const first = el('span');
+            if (hidden === 0) {
+                first.textContent = 'No personal details found in your message';
+            } else {
+                first.append(el('strong', '', `${hidden} detail${hidden === 1 ? '' : 's'}`), document.createTextNode(' hidden from the AI'));
+            }
+            receipt.append(first);
+
+            if (data.placeholdersRestored.length) {
+                receipt.append(el('span', '', `${data.placeholdersRestored.length} put back in the answer`));
+            }
+            receipt.append(el('span', '', `Answered by ${data.model}`));
+            ctx.exchange.append(receipt);
+
+            if (data.routing === 'review') {
+                ctx.exchange.append(el('p', 'notice warn', 'Some personal details may not have been caught. Switch to "The AI" to check what was sent.'));
+            }
+            if (data.unknownPlaceholders.length) {
+                ctx.exchange.append(el('p', 'notice', `The AI mentioned ${data.unknownPlaceholders.join(', ')}, which wasn't in your message, so it's shown as is.`));
+            }
+        }
+
+        function errorMessage(status, detail) {
+            if (status === 401) return { text: 'You have used all free messages. Log in on the Anonymizer page to keep going.', link: { href: '/', label: 'Go to Anonymizer' } };
+            if (status === 403) return { text: 'Your usage quota is used up.' };
+            if (status === 422 && detail && detail.reasons) {
+                return { text: `Not sent, because some personal details may not have been caught (${detail.reasons.join('; ')}). Rephrase, add words to hide, or turn off "Don't send if unsure".` };
+            }
+            if (status === 422) return { text: 'That message could not be sent. Messages must be between 1 and 8,000 characters.' };
+            if (status === 502) return { text: "Couldn't reach the AI model. Check that LM Studio is running and the model is loaded, then try again." };
+            if (status === 500) return { text: 'Not sent: a detail could not be safely hidden and restored. Try rephrasing the message.' };
+            return { text: 'Something went wrong. Check that the server is running, then try again.' };
+        }
+
+        function showError(ctx, status, detail) {
+            const { text, link } = errorMessage(status, detail);
+            const note = el('p', 'notice warn', text);
+            if (link) {
+                note.append(document.createTextNode(' '));
+                const a = el('a', '', link.label);
+                a.href = link.href;
+                note.append(a);
+            }
+            ctx.exchange.append(note);
+        }
+
+        async function send(promptText) {
+            if (busy) return;
+            busy = true;
+            updateComposer();
+            els.intro.hidden = true;
+
+            const ctx = buildExchange(promptText);
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        prompt: promptText,
+                        blocklist: els.blocklist.value.trim(),
+                        strict: els.strict.checked,
+                    }),
+                });
+                const data = await response.json().catch(() => ({}));
+                ctx.thinking.remove();
+                if (!response.ok) {
+                    showError(ctx, response.status, data.detail);
+                    return;
+                }
+                addViewSwitch(ctx, data, promptText);
+                addReceipt(ctx, data);
+                els.navModel.textContent = data.model;
+            } catch (error) {
+                ctx.thinking.remove();
+                showError(ctx, 0);
+            } finally {
+                busy = false;
+                updateComposer();
+                ctx.exchange.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+        }
+
+        function updateComposer() {
+            const length = els.prompt.value.length;
+            els.count.textContent = `${length.toLocaleString('en-US')} / ${MAX_CHARS.toLocaleString('en-US')}`;
+            els.count.classList.toggle('over', length > MAX_CHARS);
+            els.send.disabled = busy || !els.prompt.value.trim() || length > MAX_CHARS;
+            els.prompt.style.height = 'auto';
+            els.prompt.style.height = `${els.prompt.scrollHeight}px`;
+        }
+
+        els.form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const text = els.prompt.value.trim();
+            if (!text || busy) return;
+            els.prompt.value = '';
+            updateComposer();
+            send(text);
+        });
+
+        els.prompt.addEventListener('input', updateComposer);
+        els.prompt.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+                event.preventDefault();
+                els.form.requestSubmit();
+            }
+        });
+
+        els.blocklistToggle.addEventListener('click', () => {
+            const open = els.blocklistField.hidden;
+            els.blocklistField.hidden = !open;
+            els.blocklistToggle.setAttribute('aria-expanded', String(open));
+            if (open) els.blocklist.focus();
+        });
+
+        document.querySelectorAll('.suggestions button').forEach((button) => {
+            button.addEventListener('click', () => {
+                els.prompt.value = button.dataset.prompt;
+                updateComposer();
+                els.prompt.focus();
+            });
+        });
+
+        (function buildRibbon() {
+            const line = 'Draft a reply to [PERSON_01] confirming our call on [PHONE_01] and copy [EMAIL_01]. Remind [PERSON_02] that the invoice goes to [IBAN_01].';
+            for (const part of splitPlaceholders(line)) {
+                els.ribbon.append(part.kind === 'ph' ? el('span', 'ph', part.value) : document.createTextNode(part.value));
+            }
+        })();
+
+        updateComposer();
+    </script>
+</body>
+</html>
