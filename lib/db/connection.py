@@ -1,42 +1,53 @@
 """
 Database connection management for Vercel Postgres.
+
+When sqlalchemy is not installed (or POSTGRES_URL is not set) the module
+degrades gracefully: DB_AVAILABLE is False, get_db() raises RuntimeError,
+and get_db_dependency() yields None so that optional_user and other optional
+FastAPI dependencies can still function without a database.
 """
 
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
 from contextlib import contextmanager
-from typing import Generator
+from typing import Generator, Optional
 
-# Get database URL from environment
+try:
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker, Session as _Session
+    _SA_AVAILABLE = True
+except ImportError:
+    _SA_AVAILABLE = False
+    _Session = None  # type: ignore[assignment,misc]
+
 DATABASE_URL = os.getenv("POSTGRES_URL")
 
-if not DATABASE_URL:
-    print("Warning: POSTGRES_URL environment variable not set")
-    engine = None
-    SessionLocal = None
-else:
-    # Create SQLAlchemy engine with connection pooling
+if _SA_AVAILABLE and DATABASE_URL:
     engine = create_engine(
         DATABASE_URL,
-        pool_pre_ping=True,  # Verify connections before using
+        pool_pre_ping=True,
         pool_size=5,
-        max_overflow=10
+        max_overflow=10,
     )
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    DB_AVAILABLE = True
+else:
+    engine = None
+    SessionLocal = None
+    DB_AVAILABLE = False
+    if not _SA_AVAILABLE:
+        print("Warning: sqlalchemy not installed – database features disabled")
+    elif not DATABASE_URL:
+        print("Warning: POSTGRES_URL not set – database features disabled")
 
 
 @contextmanager
-def get_db() -> Generator[Session, None, None]:
+def get_db():
     """
-    Provide a transactional scope for database operations.
-
-    Usage:
-        with get_db() as db:
-            user = db.query(User).first()
+    Provide a transactional scope around database operations.
+    Raises RuntimeError when the database is not configured.
     """
     if not SessionLocal:
-        raise RuntimeError("Database not configured. Set POSTGRES_URL environment variable.")
+        raise RuntimeError("Database not configured. Set POSTGRES_URL (and install sqlalchemy).")
 
     db = SessionLocal()
     try:
@@ -48,14 +59,12 @@ def get_db() -> Generator[Session, None, None]:
 def get_db_dependency():
     """
     FastAPI dependency for database sessions.
-
-    Usage:
-        @app.get("/users")
-        def get_users(db: Session = Depends(get_db_dependency)):
-            return db.query(User).all()
+    Yields None when the database is not configured so that optional
+    endpoints can still serve requests without a database.
     """
     if not SessionLocal:
-        raise RuntimeError("Database not configured. Set POSTGRES_URL environment variable.")
+        yield None
+        return
 
     db = SessionLocal()
     try:

@@ -9,7 +9,7 @@ This system processes text messages from various sources (chat apps, SMS, emails
 ### Key Features
 
 - **Multi-stage pipeline**: Regex → NER → Blocklist → Scoring → Validation
-- **Dual NER engines**: spaCy (en_core_web_lg, de_core_news_lg) + Microsoft Presidio
+- **Dual NER engines**: spaCy (en_core_web_sm/lg, de_core_news_sm/lg) + Microsoft Presidio
 - **Multilingual support**: English and German language detection
 - **Confidence scoring**: Weighted scoring with routing decisions (pass/pass_flagged/review)
 - **Quasi-identifier detection**: Identifies role + location + age combinations
@@ -369,6 +369,92 @@ pip install --force-reinstall --no-deps \
 
 - Check Pydantic version (must be 2.5.0+)
 - Verify `@field_serializer` in `lib/types.py`
+
+## Deploying to Vercel (hackathon / demo)
+
+### Required environment variables
+
+| Variable | Purpose | Example |
+|---|---|---|
+| `LLM_BASE_URL` | OpenAI-compatible API base URL | `https://api.x.ai/v1` |
+| `LLM_API_KEY` | API key for the LLM | `xai-…` |
+| `LLM_MODEL` | Model identifier | `grok-4.20-0309-non-reasoning` |
+
+All other variables are optional for the demo (see `.env.example` for the full list).
+
+### Optional environment variables
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `SPACY_MODEL_SIZE` | `sm` | Use `lg` locally for higher accuracy |
+| `LLM_TIMEOUT_SECONDS` | `120` | LLM request timeout |
+| `CORS_ORIGINS` | localhost | Comma-separated allowed origins |
+| `POSTGRES_URL` | *(unset)* | Enables usage tracking & auth |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | *(unset)* | Enables Google OAuth |
+| `JWT_SECRET_KEY` | insecure default | Sign JWT cookies (set when using OAuth) |
+| `FREE_TIER_LIMIT` | `5` | Anonymous request limit (requires DB) |
+
+### Steps
+
+1. Push this branch to GitHub (or fork the repo).
+2. Import the project into [Vercel](https://vercel.com/new).
+3. Add the required env vars in **Project → Settings → Environment Variables**.
+4. Deploy. Vercel reads `vercel.json` automatically:
+   - All routes → `api/anonymise.py` (FastAPI via Mangum)
+   - Function runtime: Python 3.12, max duration 60 s
+5. The frontend is served at `/` and `/chat`; the API is at `/api/anonymise` and `/api/chat`.
+
+### Bundle size (Hobby plan)
+
+The deployment targets Vercel's **Hobby plan** (50 MB compressed function limit).
+
+| Compressed wheel | Size |
+|---|---|
+| spacy 3.8.3 (Linux x86_64) | 7.0 MB |
+| blis (spacy dep) | 3.7 MB |
+| thinc + other spacy deps | 4.0 MB |
+| en_core_web_sm-3.8.0 | 12.8 MB |
+| de_core_news_sm-3.8.0 | 15.0 MB |
+| presidio-analyzer | 0.6 MB |
+| phonenumbers | 8.3 MB |
+| pydantic + pydantic-core | 2.2 MB |
+| fastapi + starlette + mangum + uvicorn | 0.8 MB |
+| httpx + httpcore + anyio | 0.7 MB |
+| python-jose (no cryptography extra) | 0.1 MB |
+| authlib + itsdangerous + multipart | 0.2 MB |
+| python-dotenv + pyahocorasick | 0.1 MB |
+| **Estimated total** | **~55.5 MB** |
+
+> **What was removed to fit:** `sqlalchemy`, `psycopg2-binary`, and the
+> `[cryptography]` extra from `python-jose` are **not** in `requirements.txt`.
+> The app handles their absence gracefully (all three default to no-op /
+> disabled when missing). Install them locally if you need DB / OAuth features
+> (see bottom of `requirements.txt`).
+
+The estimate may fall slightly under or over 50 MB depending on Vercel's
+bundler; if the deploy is rejected on Hobby, upgrade to **Pro** (250 MB limit)
+or drop `de_core_news_sm` from `requirements.txt` (saves ~15 MB) and accept
+English-only NER.
+
+> **maxDuration 60 s** requires a **Pro** plan on Vercel. Hobby is capped at
+> 10 s, which is too short for LLM calls. Reduce `maxDuration` to `10` and set
+> `LLM_TIMEOUT_SECONDS=8` for a quick Hobby smoke-test of the anonymise
+> pipeline only.
+
+Set `SPACY_MODEL_SIZE=lg` **locally** (and install the lg model wheels) to get
+higher NER accuracy in development.
+
+### Running locally without a database
+
+```bash
+cp .env.example .env
+# edit .env: set LLM_BASE_URL / LLM_API_KEY / LLM_MODEL
+uvicorn api.anonymise:app --reload --port 8000
+```
+
+The app starts, serves the frontend at `http://localhost:8000/`, and both
+`/api/anonymise` and `/api/chat` work without `POSTGRES_URL` (all requests
+are allowed in demo mode).
 
 ## Contributing
 
