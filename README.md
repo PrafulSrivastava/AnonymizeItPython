@@ -219,6 +219,27 @@ curl -X POST http://localhost:8000/api/anonymise \
   }'
 ```
 
+### Private Chat Workflow (anonymize → LLM → re-enrich)
+
+**POST** `/api/chat` anonymizes the prompt, sends only the anonymized text to an
+OpenAI-compatible LLM, and restores the original values in the answer. The
+placeholder-to-original mapping exists only in memory for that one request.
+
+Configure the LLM in `.env` (`LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`,
+`LLM_TIMEOUT_SECONDS`). Defaults target LM Studio at `http://localhost:1234/v1`.
+
+```bash
+curl -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Draft a two-sentence reply to Marcus Weber (marcus.weber@acmecorp.com) confirming our call on +49 170 555 0198.", "blocklist": "Marcus Weber,Marcus"}'
+```
+
+The response contains `answer` (re-enriched), `anonymizedPrompt` (exactly what the
+LLM saw), `anonymizedAnswer`, the placeholders sent and restored, any
+`unknownPlaceholders` the model invented, and the anonymizer's `routing`.
+Prompts are limited to 8000 characters. Set `"strict": true` to refuse sending
+prompts the anonymizer routes to `review` (HTTP 422).
+
 ## Token Types
 
 | Type | Description | Example |
